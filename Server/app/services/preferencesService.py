@@ -1,12 +1,20 @@
 from sqlalchemy.orm import Session
-from db.models import Preferences
-from db.schemas import PreferencesCreate #a ajouter pour valider les donnes 
+from app.db.models import Preferences
+from fastapi import HTTPException 
 
-class PreferencesService:
-    def __init__(self, db: Session):
-        self.db =db 
-    
-    
-    @staticmethod
-    def createPreference(self, preferenceData: PreferencesCreate):
-        newPreference = Preferences
+
+
+
+def createPreferenceService(db : Session, lieuDepart: str, budget: float, idPlan: int, userId:int):
+
+    newPref = Preferences(
+        lieuDepart = lieuDepart,
+        budget = budget,
+        idPlan = idPlan,
+        userId = userId
+    )
+    db.add(newPref)
+    db.commit()
+    db.refresh(newPref)
+
+    return newPref

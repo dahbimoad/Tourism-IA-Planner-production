@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from database import Base
+from app.db.database import Base
 
 
 class Plans(Base):
@@ -58,7 +58,6 @@ class Activities(Base):
     adresse = Column(String) 
     idVille = Column(Integer, ForeignKey("villes.id"))  
     ville = relationship("Villes", back_populates="activities")
-    itineraries = relationship("Itineraires", secondary="itinerary_activity", back_populates="activities")
 
 
 class Itineraires(Base):
