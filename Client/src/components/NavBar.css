@@ -1,72 +1,138 @@
+
 .navbar {
-  width: 100%; /* Prend toute la largeur de la page */
-  position: fixed; /* La navbar reste en haut même lors du défilement */
-  top: 0; /* Fixée au haut de la page */
-  left: 0; /* Commence à gauche */
-  z-index: 100; /* Toujours au-dessus des autres éléments */
-  display: flex; /* Flexbox pour aligner le contenu */
-  justify-content: space-between; /* Sépare le logo et les liens */
-  align-items: center; /* Aligne verticalement le contenu */
-  padding: 20px 50px;
-  background-color: #f1f1f1; /* Couleur de fond de la navbar */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Logo Styles */
 .logo {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: bold;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
 }
 
-.nav-links {
+.logo-icon {
+  font-size: 1.2rem;
+  color: #f59e0b;
+  margin-left: 0.2rem;
+}
+
+/* Toggle Button Styles */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 21px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.menu-toggle .bar {
+  width: 100%;
+  height: 3px;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.nav-list {
   display: flex;
   list-style: none;
 }
 
-.nav-links li {
-  margin-left: 20px;
+.nav-item {
+  margin-left: 2rem;
 }
 
-.nav-links a {
+.nav-link {
   text-decoration: none;
-  color: #333;
-  font-weight: 600;
-  transition: color 0.3s ease;
+  font-size: 1rem;
+  color: #1a202c;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.nav-links a:hover {
-  color: #f7941d;
+.nav-link:hover {
+  color: #000000;
+  background-color: #ffa500; /* Orange */
+  border-radius: 5px;
+}
+
+.sign-up {
+  padding: 0.5rem 1rem;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: 6366f1;
+  transition: all 0.3s ease;
+}
+
+.sign-up:hover {
+  background-color: #ffa500; /* Orange */
+  color: #fff;
+}
+
+/* Language Selector */
+.language-selector {
+  margin-left: 2rem;
+  position: relative;
+}
+
+.chevron {
+  font-size: 0.8rem;
+  margin-left: 0.2rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 15px 20px;
+  .menu-toggle {
+    display: flex;
   }
 
-  .logo {
-    font-size: 20px;
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    width: 100%;
+    border-top: 1px solid #e0e0e0;
   }
 
-  .nav-links {
-    flex-direction: column; /* Les liens passent sous le logo */
-    align-items: center;
+  .nav-menu.active {
+    display: block;
   }
 
-  .nav-links li {
-    margin: 10px 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar {
-    padding: 10px 15px;
+  .nav-list {
+    flex-direction: column;
+    width: 100%;
   }
 
-  .logo {
-    font-size: 18px;
-  }
-
-  .nav-links li {
-    margin: 8px 0;
+  .nav-item {
+    margin: 1rem 0;
+    text-align: center;
   }
 }

@@ -19,11 +19,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #ffa500;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #ffa500;
 }
 
 body {
@@ -51,7 +51,7 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #ffa500;
 }
 button:focus,
 button:focus-visible {
@@ -64,7 +64,7 @@ button:focus-visible {
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    color: #ffa500;
   }
   button {
     background-color: #f9f9f9;
