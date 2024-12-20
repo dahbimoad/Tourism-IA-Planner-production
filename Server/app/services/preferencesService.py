@@ -6,8 +6,9 @@ from app.db.database import get_db
 
 
 
-def createPreferenceService(db : Session, lieuDepart: str, dateDepart: str, dateRetour: str,budget: float, idPlan: int, userId:int):
+def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],dateDepart: str, dateRetour: str,budget: float, idPlan: int, userId:int):
     
+
     newPref = Preferences(
         lieuDepart = lieuDepart,
         dateDepart = dateDepart,
@@ -19,5 +20,7 @@ def createPreferenceService(db : Session, lieuDepart: str, dateDepart: str, date
     db.add(newPref)
     db.commit()
     db.refresh(newPref)
+    for city in cities #ici il faut que j'implemente le getId ville pour ici chaque ville choisit je stoke son id + id de preferences  
+       #id = 
 
     return newPref

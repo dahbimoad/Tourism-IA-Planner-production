@@ -11,6 +11,7 @@ router = APIRouter()
 
 class PreferencesCreate(BaseModel):
     lieuDepart: str
+    cities: List[str]
     dateDepart: str
     dateRetour: str
     budget: float
@@ -41,6 +42,7 @@ def createPreference(preference: PreferencesCreate,db: Session = Depends(get_db)
     newPref = createPreferenceService(
     db = db,
     lieuDepart = preference.lieuDepart,
+    cities = preference.cities,
     dateDepart = preference.dateDepart,
     dateRetour = preference.dateRetour,
     budget = preference.budget,
