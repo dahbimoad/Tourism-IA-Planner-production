@@ -11,12 +11,14 @@ router = APIRouter()
 
 class PreferencesCreate(BaseModel):
     lieuDepart: str
-    cities: List[str]
+    cities: list[str]
     dateDepart: str
     dateRetour: str
     budget: float
     userId: int
 
+    
+    #Validation de la date entrer par le User;
     @root_validator(pre=True)
     def check_dates(cls, values):
         date_depart = values.get('dateDepart')
@@ -33,6 +35,8 @@ class PreferencesCreate(BaseModel):
             raise ValueError("La date de retour doit être supérieure à la date de départ")
         
         return values
+
+
 
 @router.post("/preferences/")
 def createPreference(preference: PreferencesCreate,db: Session = Depends(get_db)):

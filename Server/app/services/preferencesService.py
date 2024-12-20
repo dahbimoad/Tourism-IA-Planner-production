@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
-from app.db.models import Preferences
+from app.db.models import Preferences,LieuxToVisit
 from fastapi import HTTPException
 from app.db.database import get_db 
+from app.services.VilleService import getVilleIdByName
 
 
 
@@ -18,9 +19,20 @@ def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],da
         userId = userId
     )
     db.add(newPref)
-    db.commit()
+    db.flush()
     db.refresh(newPref)
-    for city in cities #ici il faut que j'implemente le getId ville pour ici chaque ville choisit je stoke son id + id de preferences  
-       #id = 
+    db.commit()
+    
+    
+    for city in cities:
+        cityId = getVilleIdByName(db,city)
+        newLieu = LieuxToVisit(
+            idPreference = newPref.id,
+            idVille = cityId
+        )
+        db.add(newLieu)
+        db.commit()
+
 
     return newPref
+    
