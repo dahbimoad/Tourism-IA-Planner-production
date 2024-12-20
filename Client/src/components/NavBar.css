@@ -1,4 +1,22 @@
+/* Hover underline positioned at the bottom of the navbar */
+.hover\\:line-under::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -15px; /* Adjust the distance from the element to align with the navbar bottom */
+  height: 2px; /* Line thickness */
+  background-color: #8DD3BB; /* Line color */
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease-in-out;
+}
 
+.hover\\:line-under:hover::after {
+  transform: scaleX(1);
+}
+
+/*
 .navbar {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
@@ -18,7 +36,7 @@
   margin: 0 auto;
 }
 
-/* Logo Styles */
+/* Logo Styles */ /*
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
@@ -34,7 +52,7 @@
   margin-left: 0.2rem;
 }
 
-/* Toggle Button Styles */
+/* Toggle Button Styles 
 .menu-toggle {
   display: none;
   flex-direction: column;
@@ -53,7 +71,7 @@
   border-radius: 2px;
 }
 
-/* Navigation Menu */
+/* Navigation Menu 
 .nav-menu {
   display: flex;
   justify-content: flex-end;
@@ -78,7 +96,7 @@
 
 .nav-link:hover {
   color: #000000;
-  background-color: #ffa500; /* Orange */
+  background-color: #ffa500; /* Orange 
   border-radius: 5px;
 }
 
@@ -91,11 +109,11 @@
 }
 
 .sign-up:hover {
-  background-color: #ffa500; /* Orange */
+  background-color: #ffa500; /* Orange 
   color: #fff;
 }
 
-/* Language Selector */
+/* Language Selector 
 .language-selector {
   margin-left: 2rem;
   position: relative;
@@ -106,7 +124,7 @@
   margin-left: 0.2rem;
 }
 
-/* Responsive Design */
+ Responsive Design 
 @media (max-width: 768px) {
   .menu-toggle {
     display: flex;
@@ -135,4 +153,4 @@
     margin: 1rem 0;
     text-align: center;
   }
-}
+}*/

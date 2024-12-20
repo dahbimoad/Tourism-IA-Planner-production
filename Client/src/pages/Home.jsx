@@ -10,7 +10,7 @@ const Home = () => {
   return (
     <div>
       <Navbar />
-      <HeroSection />
+      <HeroSection/>
       <ServicesComponent />
       <CarouselComponent />
     </div>

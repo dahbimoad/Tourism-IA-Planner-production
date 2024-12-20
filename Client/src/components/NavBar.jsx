@@ -10,35 +10,55 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <a href="#" className="logo">
-          LOGO<span className="logo-icon">▲</span>
-        </a>
-        
-        <button 
-          className="menu-toggle" 
-          aria-label="Toggle menu" 
-          onClick={toggleMenu}
-        >
-          <span className="bar"></span>
-          <span className="bar"></span>
-          <span className="bar"></span>
-        </button>
-
-        <div className={`nav-menu ${menuActive ? 'active' : ''}`}>
-          <ul className="nav-list">
-            <li className="nav-item"><a href="#" className="nav-link">Home</a></li>
-            <li className="nav-item"><a href="#" className="nav-link">About</a></li>
-            <li className="nav-item"><a href="#" className="nav-link">Login</a></li>
-            <li className="nav-item"><a href="#" className="nav-link sign-up">Sign Up</a></li>
-            <li className="nav-item language-selector">
-              <a href="#" className="nav-link">EN <span className="chevron">▼</span></a>
-            </li>
-          </ul>
-        </div>
+    <div className="navbar bg-base-200 shadow-md fixed z-40">
+  <div className="navbar-start">
+    <div className="dropdown">
+      <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M4 6h16M4 12h8m-8 6h16" />
+        </svg>
       </div>
-    </nav>
+      <ul
+        tabIndex={0}
+        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+        <li><a className="">Home</a></li>
+        <li><a className="">About</a></li>
+        <li><a className="">Destinations</a></li>
+        <li><a className="">Contact</a></li>
+        <li><a className="">Reviews</a></li>
+      </ul>
+    </div>
+    <a className="btn btn-ghost text-xl">
+      <span>
+        L<span className="text-[#8DD3BB]">O</span>GO
+      </span>
+    </a>
+  </div>
+  <div className="navbar-center hidden lg:flex">
+    <ul className="menu menu-horizontal px-1">
+      <li><a className="line-under hover:bg-transparent">Home</a></li>
+      <li><a className="line-under hover:bg-transparent">About</a></li>
+      <li><a className="line-under hover:bg-transparent">Destinations</a></li>
+      <li><a className="line-under hover:bg-transparent">Contact</a></li>
+      <li><a className="line-under hover:bg-transparent">Reviews</a></li>
+    </ul>
+  </div>
+  <div className="navbar-end">
+    <a className="btn bg-[#8DD3BB] text-black hover:bg-black hover:text-[#8DD3BB]">Login</a>
+  </div>
+</div>
+
+
+
   );
 };
 
