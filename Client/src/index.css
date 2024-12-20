@@ -33,3 +33,29 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Webkit Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #8DD3BB;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8DD3BB;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #68b2a0;
+}
+
+/* Firefox Scrollbar Styling */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #8DD3BB #f1f1f1;
+}
