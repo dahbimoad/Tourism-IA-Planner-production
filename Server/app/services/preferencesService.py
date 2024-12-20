@@ -6,10 +6,12 @@ from app.db.database import get_db
 
 
 
-def createPreferenceService(db : Session, lieuDepart: str, budget: float, idPlan: int, userId:int):
+def createPreferenceService(db : Session, lieuDepart: str, dateDepart: str, dateRetour: str,budget: float, idPlan: int, userId:int):
     
     newPref = Preferences(
         lieuDepart = lieuDepart,
+        dateDepart = dateDepart,
+        dateRetour = dateRetour,
         budget = budget,
         idPlan = idPlan,
         userId = userId
