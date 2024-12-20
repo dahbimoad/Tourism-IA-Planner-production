@@ -71,7 +71,7 @@ const CarouselComponent = () => {
   ]
 
   return (
-    <div className="max-w-[1320px] mx-auto"> {/* Conteneur principal pour centrer le contenu */}
+    <div id="destinations" className="max-w-[1320px] mx-auto"> {/* Conteneur principal pour centrer le contenu */}
       <div className="py-16"> {/* Marges verticales */}
         <div className="flex flex-col items-center"> 
           <div className="relative w-fit px-8 py-2 flex items-center justify-center">

@@ -27,7 +27,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <div className="relative min-h-full pt-6">
+    <div className="relative min-h-full pt-6" id="home">
       <div
         className="absolute inset-0 z-0"
         style={{

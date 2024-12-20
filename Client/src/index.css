@@ -29,4 +29,7 @@
 .line-under:hover::after {
   transform: scaleX(1); /* Line expands on hover */
 }
+html {
+  scroll-behavior: smooth;
+}
 

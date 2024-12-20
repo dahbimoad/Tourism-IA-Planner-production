@@ -2,64 +2,6 @@ import React, { useState } from "react";
 import { FaRoute, FaRegMoneyBillAlt, FaRegLightbulb, FaRegSmile, FaHeadset, FaHistory, FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaInstagram, FaMapMarkerAlt, FaRobot } from "react-icons/fa";
 
 const ReviewsSection = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
-  });
-
-  const features = [
-    {
-      icon: <FaRoute className="text-4xl text-orange-600" />,
-      title: "Personalized Itineraries",
-      description: "Tailored travel plans that match your preferences and style"
-    },
-    {
-      icon: <FaRegMoneyBillAlt className="text-4xl text-orange-600" />,
-      title: "Budget Considerations",
-      description: "Smart planning that optimizes your travel budget effectively"
-    },
-    {
-      icon: <FaRegLightbulb className="text-4xl text-orange-600" />,
-      title: "Local Insights",
-      description: "Authentic recommendations from experienced local guides"
-    },
-    {
-      icon: <FaRegSmile className="text-4xl text-orange-600" />,
-      title: "User-friendly Interface",
-      description: "Simple and intuitive platform for effortless planning"
-    },
-    {
-      icon: <FaHeadset className="text-4xl text-orange-600" />,
-      title: "24/7 Support",
-      description: "Round-the-clock assistance for your travel needs"
-    }
-  ];
-
-  const milestones = [
-    {
-      year: "2020",
-      title: "Platform Launch",
-      description: "Started our journey to revolutionize Morocco travel planning"
-    },
-    {
-      year: "2021",
-      title: "10,000+ Happy Travelers",
-      description: "Reached milestone of serving thousands of adventurers"
-    },
-    {
-      year: "2022",
-      title: "Local Partnerships",
-      description: "Established network with 100+ local guides and vendors"
-    },
-    {
-      year: "2023",
-      title: "Smart Planning",
-      description: "Introduced AI-powered itinerary optimization"
-    }
-  ];
-
   const testimonials = [
     {
       name: "Sarah Thompson",
@@ -94,7 +36,7 @@ const ReviewsSection = () => {
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white" id="reviews">
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">WHAT OUR <span className="text-[#8DD3BB]">TRAVELERS</span> SAY</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
