@@ -81,7 +81,7 @@ const CarouselComponent = () => {
             </h6>
           </div>
           <h3 className="lg:text-5xl text-3xl font-bold pb-8 text-center py-4">
-            Discover True Adventures in Morocco {/* Sous-titre */}
+            Discover True Adventures in <span className='text-[#8DD3BB]'>Morocco</span> {/* Sous-titre */}
           </h3>
         </div>
         
