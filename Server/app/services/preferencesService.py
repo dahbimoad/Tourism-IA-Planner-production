@@ -35,4 +35,75 @@ def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],da
 
 
     return newPref
+
+
+def getPreferencesService(db : Session):
+    return db.query(Preferences).all()    
+
+def getPreferencesById(db : Session, Id: int):
+    preference = db.query(Preferences).filter(Preferences.id == Id).first()
+    if preference:
+        return preference
+    else:
+        return None
+
+
+def deletePreferenceById(db: Session, id: int):
+    preference = db.query(Preferences).filter(Preferences.id == id).first()  
+    if not preference:
+        return None
+    db.query(LieuxToVisit).filter(LieuxToVisit.idPreference == id).delete()
+    db.delete(preference)
+    db.commit()
+    return preference
+
+
+def updatePreferenceService(
+    db: Session, 
+    preference_id: int, 
+    lieuDepart: str = None, 
+    cities: list[str] = None, 
+    dateDepart: str = None, 
+    dateRetour: str = None, 
+    budget: float = None, 
+    idPlan: int = None, 
+    userId: int = None
+):
+
+    preference = db.query(Preferences).filter(Preferences.id == preference_id).first()
+
+    if not preference:
+        raise HTTPException(status_code=404, detail="Preference not found")
     
+    
+    if lieuDepart is not None:
+        preference.lieuDepart = lieuDepart
+    if dateDepart is not None:
+        preference.dateDepart = dateDepart
+    if dateRetour is not None:
+        preference.dateRetour = dateRetour
+    if budget is not None:
+        preference.budget = budget
+    if idPlan is not None:
+        preference.idPlan = idPlan
+    if userId is not None:
+        preference.userId = userId
+    
+    
+    if cities is not None:
+       
+        db.query(LieuxToVisit).filter(LieuxToVisit.idPreference == preference_id).delete()
+
+
+        for city in cities:
+            cityId = getVilleIdByName(db, city)
+            newLieu = LieuxToVisit(
+                idPreference=preference_id,
+                idVille=cityId
+            )
+            db.add(newLieu)
+    
+    db.commit()
+    db.refresh(preference)
+    return preference
+
