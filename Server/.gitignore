@@ -1,47 +1,22 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+*.sqlite3
+
 # Virtual Environment
-venv/
+.venv/
 env/
-ENV/
+venv/
+
+# Alembic Cache
+alembic/versions/*.pyc
+
+# Environment Variables
 .env
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# IDEs and Editors
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# FastAPI specific
-.pytest_cache/
-coverage.xml
-htmlcov/
-
-# Logs
-*.log
-logs/
+# IDE Settings
+*.idea/
+*.vscode/

@@ -1,10 +1,8 @@
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-
+from app.core.config import settings
 from typing import Union
-
-from Server.app.core.config import settings
 
 # Initialize password context and secret key for JWT
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

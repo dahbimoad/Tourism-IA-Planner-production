@@ -1,8 +1,6 @@
 from sqlalchemy.orm import Session
-
-from Server.app.controllers.auth_controller import signup, signin
-from Server.app.schemas.user import UserCreate
-
+from app.schemas.user import UserCreate
+from app.controllers.auth_controller import signup, signin
 
 # Business logic for user signup
 def create_user_service(user: UserCreate, db: Session):

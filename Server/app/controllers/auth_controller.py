@@ -1,9 +1,9 @@
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
-from Server.app.db.models import User
-from Server.app.schemas.user import UserCreate, UserLogin
-from Server.app.core.security import hash_password, verify_password, create_access_token, verify_token
-from Server.app.db.database import get_db
+from app.db.models import User
+from app.schemas.user import UserCreate, UserLogin
+from app.core.security import hash_password, verify_password, create_access_token, verify_token
+from app.db.database import get_db
 from datetime import timedelta
 
 

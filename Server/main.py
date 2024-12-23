@@ -1,18 +1,13 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from app.routes.auth_routes import router as user_router
+from app.db.database import engine, Base
+
+# Create tables in the database
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Configuration de CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # On autorise l'accès depuis localhost:5173
-    allow_credentials=True,
-    allow_methods=["*"],  # Permet toutes les méthodes (GET, POST, PUT, DELETE)
-    allow_headers=["*"],  # Permet tous les types d'en-têtes
-)
-
-
-@app.get("/")
-def read_root():
-    return {"message": "salam 3alaykummmmm"}
+# Include user-related routes
+app.include_router(user_router, prefix="/user", tags=["user"])
+ #/user/signin
+#/user/signup
