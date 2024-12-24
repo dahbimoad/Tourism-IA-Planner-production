@@ -1,4 +1,14 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+*.sqlite3
+
 # Virtual Environment
+.venv/
+env/
 venv/
 env/
 ENV/

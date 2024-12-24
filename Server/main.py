@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+from app.routes.auth_routes import router as user_router
+from app.db.database import engine, Base
+
+# Create tables in the database
+Base.metadata.create_all(bind=engine)
 from app.controllers.preferencesController import router as preferences_router
 from app.controllers.VilleController import router as villes_router
 from app.db.database import Base, engine
@@ -9,6 +14,10 @@ logging.getLogger('sqlalchemy').setLevel(logging.INFO)
 
 app = FastAPI()
 
+# Include user-related routes
+app.include_router(user_router, prefix="/user", tags=["user"])
+ #/user/signin
+#/user/signup
 
 
 @app.on_event("startup")

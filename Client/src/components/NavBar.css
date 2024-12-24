@@ -1,0 +1,72 @@
+.navbar {
+  width: 100%; /* Prend toute la largeur de la page */
+  position: fixed; /* La navbar reste en haut même lors du défilement */
+  top: 0; /* Fixée au haut de la page */
+  left: 0; /* Commence à gauche */
+  z-index: 100; /* Toujours au-dessus des autres éléments */
+  display: flex; /* Flexbox pour aligner le contenu */
+  justify-content: space-between; /* Sépare le logo et les liens */
+  align-items: center; /* Aligne verticalement le contenu */
+  padding: 20px 50px;
+  background-color: #f1f1f1; /* Couleur de fond de la navbar */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #f7941d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    flex-direction: column; /* Les liens passent sous le logo */
+    align-items: center;
+  }
+
+  .nav-links li {
+    margin: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .nav-links li {
+    margin: 8px 0;
+  }
+}
