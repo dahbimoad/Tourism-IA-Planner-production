@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float,UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 from sqlalchemy import PrimaryKeyConstraint
@@ -15,19 +15,21 @@ class Plans(Base):
 class Preferences(Base):
     __tablename__ = "preferences"
 
-    id = Column(Integer, autoincrement=True) 
-    lieuDepart = Column(String)  
+    id = Column(Integer, autoincrement=True)  # La colonne id reste autoincrémentée
+    lieuDepart = Column(String)  # fait partie de la clé composite
     budget = Column(Float)
-    dateDepart = Column(Date) 
-    dateRetour = Column(Date)  
-    idPlan = Column(Integer, ForeignKey("plans.id"), unique=True)  
+    dateDepart = Column(Date)
+    dateRetour = Column(Date)
+    idPlan = Column(Integer, ForeignKey("plans.id"), unique=True)
     plan = relationship("Plans", back_populates="preference")
-    userId = Column(Integer, ForeignKey("users.id"))  
+    userId = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="preferences")
     villes = relationship("LieuxToVisit", back_populates="preference")
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'lieuDepart'),
+        PrimaryKeyConstraint('id', 'lieuDepart'),  
+       
+        UniqueConstraint('id'),
     )
 
 class User(Base):
