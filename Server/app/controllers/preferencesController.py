@@ -15,8 +15,8 @@ router = APIRouter()
 class PreferencesCreate(BaseModel):
     lieuDepart: str
     cities: list[str]
-    dateDepart: str
-    dateRetour: str
+    dateDepart: datetime
+    dateRetour: datetime
     budget: float
     userId: int
 
