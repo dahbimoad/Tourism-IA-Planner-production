@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  
   /**
    * Petite fonction utilitaire pour éviter la duplication de code
    * lors des appels d'authentification (login/signup).
