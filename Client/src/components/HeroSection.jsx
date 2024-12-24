@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { FaRoute, FaPiggyBank, FaUserFriends } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
@@ -55,6 +57,7 @@ const HeroSection = () => {
             <button
               className="px-8 py-4 text-lg font-medium text-white transition-all duration-300 transform bg-[#8DD3BB] rounded-full hover:bg-[#8DD3BB] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#8DD3BB] focus:ring-offset-2"
               aria-label="Start Planning Your Adventure"
+              onClick={() => navigate("/signup")}
             >
               Start Planning Your Adventure
             </button>
