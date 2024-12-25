@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './NavBar.css';
+import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [menuActive, setMenuActive] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);
@@ -52,7 +54,7 @@ const NavBar = () => {
         </ul>
       </div>
       <div className="navbar-end">
-        <a className="btn bg-[#8DD3BB] text-black hover:bg-black hover:text-[#8DD3BB] rounded-full">Login</a>
+        <a className="btn bg-[#8DD3BB] text-black hover:bg-black hover:text-[#8DD3BB] rounded-full" onClick={() => navigate("/login")}>Login</a>
       </div>
     </div>
   );
