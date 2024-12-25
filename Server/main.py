@@ -1,18 +1,33 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from app.routes.auth_routes import router as user_router
+from app.db.database import engine, Base
+
+# Create tables in the database
+Base.metadata.create_all(bind=engine)
+from app.controllers.preferencesController import router as preferences_router
+from app.controllers.VilleController import router as villes_router
+from app.db.database import Base, engine
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy').setLevel(logging.INFO)
+
 
 app = FastAPI()
 
-# Configuration de CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # On autorise l'accès depuis localhost:5173
-    allow_credentials=True,
-    allow_methods=["*"],  # Permet toutes les méthodes (GET, POST, PUT, DELETE)
-    allow_headers=["*"],  # Permet tous les types d'en-têtes
-)
+# Include user-related routes
+app.include_router(user_router, prefix="/user", tags=["user"])
+ #/user/signin
+#/user/signup
+
+
+@app.on_event("startup")
+def startup_event():
+    Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
 def read_root():
     return {"message": "salam 3alaykummmmm"}
+
+app.include_router(preferences_router)
+app.include_router(villes_router)
