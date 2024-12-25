@@ -10,13 +10,52 @@ __pycache__/
 .venv/
 env/
 venv/
-
-# Alembic Cache
-alembic/versions/*.pyc
-
-# Environment Variables
+env/
+ENV/
 .env
 
-# IDE Settings
-*.idea/
-*.vscode/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+#Migration 
+alembic/
+alembic.ini
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# FastAPI specific
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# Logs
+*.log
+logs/
