@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/';
+const API_URL = 'https://tourism-ia-planner-production.onrender.com/';
 
 
 export const getMessageFromAPI = async () => {
