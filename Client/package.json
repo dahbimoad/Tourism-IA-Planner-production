@@ -19,11 +19,13 @@
     "jwt-decode": "^3.1.2",
     "react": "^18.3.1",
     "react-cookie": "^7.2.2",
+    "react-datepicker": "^7.5.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
     "react-multi-carousel": "^2.8.5",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.0.2",
+    "react-router-dom": "^7.1.1",
+    "react-select": "^5.9.0",
     "three": "^0.171.0"
   },
   "devDependencies": {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const NavbarUser = () => {
   const [menuActive, setMenuActive] = useState(false);
@@ -38,13 +39,16 @@ const NavbarUser = () => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a href="#home">Home</a>
+              <a href="/">Home</a>
             </li>
             <li>
-              <a href="#about">Find Plan</a>
+              <a href="/dashboard1/form">Find Plan</a>
             </li>
             <li>
-              <a href="#destinations">Plans</a>
+              <a href="/dashboard1/plans">Plans</a>
+            </li>
+            <li>
+              <a href="/t">Favourites</a>
             </li>
           </ul>
         </div>
@@ -52,21 +56,29 @@ const NavbarUser = () => {
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <a href="#home" className="line-under hover:bg-transparent">
+              <a href="/" className="line-under hover:bg-transparent">
                 Home
               </a>
             </li>
             <li>
-              <a href="#about" className="line-under hover:bg-transparent">
+              <a href="/dashboard1/form" className="line-under hover:bg-transparent">
                 Find Plan
               </a>
             </li>
             <li>
               <a
-                href="#destinations"
+                href="/dashboard1/plans"
                 className="line-under hover:bg-transparent"
               >
                 Plans
+              </a>
+            </li>
+            <li>
+              <a
+                href="/"
+                className="line-under hover:bg-transparent"
+              >
+                Favourites
               </a>
             </li>
           </ul>

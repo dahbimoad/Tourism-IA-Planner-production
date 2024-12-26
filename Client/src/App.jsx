@@ -7,6 +7,8 @@ import SignupPage from "./pages/SignupPage";
 import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from "./pages/Dashboard";
 import UserInterface from "./pages/UserInterface";
+import Form from "./components/Form";
+import Plans from "./components/Plans";
 
 const App = () => {
   return (
@@ -27,6 +29,10 @@ const App = () => {
             }
           />
           {/* Add more routes here */}
+          <Route path="/dashboard1" element={<UserInterface />}>
+            <Route path="form" element={<Form />} />
+            <Route path="plans" element={<Plans />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

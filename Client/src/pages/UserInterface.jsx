@@ -1,14 +1,17 @@
-import React from 'react'
+import React from 'react';
+import { Outlet } from 'react-router-dom';
 import NavbarUser from '../components/NavbarUser';
-import Form from '../components/Form';
 
 const UserInterface = () => {
   return (
     <div>
       <NavbarUser />
-      <Form />
+      <div>
+        {/* Render the nested routes */}
+        <Outlet />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserInterface
+export default UserInterface;
