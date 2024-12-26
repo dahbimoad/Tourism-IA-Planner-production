@@ -6,12 +6,14 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from "./pages/Dashboard";
+import UserInterface from "./pages/UserInterface";
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/dashboard1" element={<UserInterface />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
