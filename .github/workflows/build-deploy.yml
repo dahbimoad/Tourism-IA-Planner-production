@@ -60,7 +60,7 @@ jobs:
 
       # Step 5: Deploy Frontend to Render
       - name: Deploy Frontend to Render
-        uses: render-examples/render-deploy-blueprint-action@v1
+        uses: render-examples/deploy-blueprint-action@v1
         with:
           service-id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
           api_key: ${{ secrets.RENDER_API_KEY }}
