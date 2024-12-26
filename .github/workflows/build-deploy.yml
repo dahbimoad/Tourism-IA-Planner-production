@@ -60,7 +60,7 @@ jobs:
 
       # Step 5: Deploy Frontend to Render
       - name: Deploy Frontend to Render
-        uses: brycedorn/react-snap-action@v1.0.2
+        uses: render-examples/deploy-static-action@v1
         with:
           service_id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
           api_key: ${{ secrets.RENDER_API_KEY }}
