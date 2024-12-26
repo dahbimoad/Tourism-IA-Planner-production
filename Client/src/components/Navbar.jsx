@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './NavBar.css';
+import './Navbar.css';
 import { useNavigate } from "react-router-dom";
 
-const NavBar = () => {
+const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
   const navigate = useNavigate();
 
@@ -60,4 +60,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default Navbar;
