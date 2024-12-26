@@ -41,7 +41,7 @@ def startup_event():
 
 @app.get("/")
 def root_endpoint():
-    return {"message": "hellooooaaaaaaaaaaaaaaaa"}
+    return {"message": "hellooooaaaaaaaaaaaaaaaadkfdk"}
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
