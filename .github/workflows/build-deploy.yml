@@ -5,37 +5,37 @@ on:
     branches: [main]
 
 jobs:
-  deploy-backend:
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout Code
-      - name: Checkout Code
-        uses: actions/checkout@v2
+  # deploy-backend:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Step 1: Checkout Code
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v2
 
-      # Step 2: Setup Python Environment
-      - name: Setup Python Environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
+  #     # Step 2: Setup Python Environment
+  #     - name: Setup Python Environment
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.9'
 
-      # Step 3: Install Backend Dependencies in Virtual Environment
-      - name: Install Backend Dependencies
-        working-directory: ./Server
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+  #     # Step 3: Install Backend Dependencies in Virtual Environment
+  #     - name: Install Backend Dependencies
+  #       working-directory: ./Server
+  #       run: |
+  #         python -m venv venv
+  #         source venv/bin/activate
+  #         pip install --upgrade pip
+  #         pip install -r requirements.txt
 
-      # Step 4: Deploy Backend to Render
-      - name: Deploy Backend to Render
-        uses: JorgeLNJunior/render-deploy@v1.3.2
-        with:
-          service_id: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
-          api_key: ${{ secrets.RENDER_API_KEY }}
+  #     # Step 4: Deploy Backend to Render
+  #     - name: Deploy Backend to Render
+  #       uses: JorgeLNJunior/render-deploy@v1.3.2
+  #       with:
+  #         service_id: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
+  #         api_key: ${{ secrets.RENDER_API_KEY }}
 
   deploy-frontend:
-    needs: deploy-backend
+    # needs: deploy-backend # removed needs because backend is not being deployed now.
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout Code (Frontend)
@@ -60,7 +60,7 @@ jobs:
 
       # Step 5: Deploy Frontend to Render
       - name: Deploy Frontend to Render
-        uses: actions/deploy-render@v1
+        uses: brycedorn/react-snap-action@v1.0.2
         with:
-          service-id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
+          service_id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
           api_key: ${{ secrets.RENDER_API_KEY }}
