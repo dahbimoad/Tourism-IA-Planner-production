@@ -1,36 +1,32 @@
-# .github/workflows/backend-deploy.yml
 name: Backend CI/CD
 
 on:
   push:
-    branches: [ main ]
-    # paths:
-    #   - 'server/**'
+    branches: [main]
 
 jobs:
-  test-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Setup Python
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Step 2: Setup Python Environment
+      - name: Setup Python Environment
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      
+
+      # Step 3: Install Dependencies in Virtual Environment
       - name: Install Dependencies
         run: |
-          cd ./server
-          pip install -r requirements.txt
-          
-      - name: Run Tests
-        env:
-          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-        run: |
-          cd server
-          pytest
-          
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r Server/requirements.txt
+
+      # Step 4: Deploy to Render
       - name: Deploy to Render
         uses: JorgeLNJunior/render-deploy@v1.3.2
         with:
