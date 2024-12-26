@@ -1,11 +1,14 @@
-name: Deploy to Render
+# .github/workflows/backend-deploy.yml
+name: Backend CI/CD
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'server/**'
 
 jobs:
-  deploy:
+  test-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,30 +18,18 @@ jobs:
         with:
           python-version: '3.9'
       
-      - name: Install Backend Dependencies
+      - name: Install Dependencies
         run: |
           cd server
           pip install -r requirements.txt
           
-      - name: Run Backend Tests
+      - name: Run Tests
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         run: |
           cd server
           pytest
-          
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-          
-      - name: Install Frontend Dependencies
-        run: |
-          cd client
-          npm install
-          
-      - name: Build Frontend
-        run: |
-          cd client
-          npm run build
           
       - name: Deploy to Render
         uses: JorgeLNJunior/render-deploy@v1.3.2
