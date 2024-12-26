@@ -39,7 +39,9 @@ def startup_event():
     Base.metadata.create_all(bind=engine)
 
 
-
+@app.get("/")
+def root_endpoint():
+    return {"message": "helloooo"}
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
