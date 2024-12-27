@@ -17,7 +17,7 @@ def signup_user(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/signin")
 def signin_user(user: UserLogin, db: Session = Depends(get_db)):
     return authenticate_user_service(user, db)
-@router.get("/me", response_model=UserOut)
+@router.get("/me", response_model=UserOut) # sert a retourner les infos de User Authentifié
 def get_current_user_info(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

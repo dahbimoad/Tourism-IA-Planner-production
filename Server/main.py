@@ -21,7 +21,7 @@ app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
-
+#get userById 
 
 # Autoriser l'origine spécifique de votre frontend
 origins = [

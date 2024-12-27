@@ -7,9 +7,13 @@ from pydantic import BaseModel,root_validator
 from datetime import datetime
 from fastapi import HTTPException
 from typing import Optional
+from app.db.models import User
+from app.routes.auth_routes import get_current_user_info
+import pdb
 
 
 router = APIRouter()
+
 
 
 class PreferencesCreate(BaseModel):
@@ -18,7 +22,6 @@ class PreferencesCreate(BaseModel):
     dateDepart: datetime
     dateRetour: datetime
     budget: float
-    userId: int
 
     
     #Validation de la date entrer par le User;
@@ -41,20 +44,22 @@ class PreferencesCreate(BaseModel):
 
 
 
+
+
 @router.post("/preferences/")
-def createPreference(preference: PreferencesCreate,db: Session = Depends(get_db)):
-    
-    newPlan = createPlansService(db = db )
+def createPreference(preference: PreferencesCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user_info)):
+    # Vous pouvez aussi imprimer l'ID de l'utilisateur pour vérifier
+    newPlan = createPlansService(db=db)
     
     newPref = createPreferenceService(
-    db = db,
-    lieuDepart = preference.lieuDepart,
-    cities = preference.cities,
-    dateDepart = preference.dateDepart,
-    dateRetour = preference.dateRetour,
-    budget = preference.budget,
-    idPlan= newPlan.id,
-    userId= preference.userId
+        db=db,
+        lieuDepart=preference.lieuDepart,
+        cities=preference.cities,
+        dateDepart=preference.dateDepart,
+        dateRetour=preference.dateRetour,
+        budget=preference.budget,
+        idPlan=newPlan.id,
+        userId=current_user["id"],
     )
 
     return {"message": "Preference created successfully", "preference": {
@@ -64,6 +69,7 @@ def createPreference(preference: PreferencesCreate,db: Session = Depends(get_db)
         "idPlan": newPref.idPlan,
         "userId": newPref.userId
     }}
+
 
 @router.get("/preferences/")
 def getAll(db: Session = Depends(get_db)):
