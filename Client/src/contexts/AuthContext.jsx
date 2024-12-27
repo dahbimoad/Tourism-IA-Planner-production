@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
    * Exemple de credentials : { email: '...', password: '...' }
    */
   const login = (credentials) => {
-    return authenticate('https://touristai.online/user/signin', credentials);
+    return authenticate('https://tourism-ia-planner-production-client.onrender.com/user/signin', credentials);
   };
 
   /**
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
    * }
    */
   const signup = (userData) => {
-    return authenticate('https://touristai.online/user/signup', userData);
+    return authenticate('https://tourism-ia-planner-production-client.onrender.com/user/signup', userData);
   };
 
   /**
