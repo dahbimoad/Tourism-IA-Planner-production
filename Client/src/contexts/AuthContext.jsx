@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
    * Exemple de credentials : { email: '...', password: '...' }
    */
   const login = (credentials) => {
-    return authenticate('http://localhost:8000/user/signin', credentials);
+    return authenticate('https://touristai.online/user/signin', credentials);
   };
 
   /**
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
    * }
    */
   const signup = (userData) => {
-    return authenticate('http://localhost:8000/user/signup', userData);
+    return authenticate('https://touristai.online/user/signup', userData);
   };
 
   /**
