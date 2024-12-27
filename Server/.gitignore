@@ -1,4 +1,14 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+*.sqlite3
+
 # Virtual Environment
+.venv/
+env/
 venv/
 env/
 ENV/
@@ -25,6 +35,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+#Migration 
+alembic/
+alembic.ini
 
 # IDEs and Editors
 .idea/

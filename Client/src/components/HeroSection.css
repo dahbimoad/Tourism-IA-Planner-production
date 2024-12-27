@@ -1,0 +1,106 @@
+/* HeroSection.css */
+
+.hero-section {
+  background-color: #fff;
+  padding: 6rem 2rem; /* Augmenter la distance en haut */
+}
+
+
+
+.hero-container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: center; /* Centrer verticalement */
+  justify-content: center; /* Centrer horizontalement */
+  min-height: 100vh; /* Pour que la section occupe toute la hauteur de l'écran */
+}
+
+
+.hero-content {
+  grid-column: span 7 / span 7;
+  text-align: left;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  color: #1a202c;
+  line-height: 1.2;
+}
+
+.hero-title .highlight {
+  color: #e63946;
+  text-decoration: underline;
+}
+
+.hero-description {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.button-primary {
+  color: #1a202c;
+  background-color: #facc15;
+}
+
+.button-primary:hover {
+  background-color: #fbbf24;
+}
+
+.hero-image {
+  grid-column: span 5 / span 5;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-content {
+    grid-column: span 12 / span 12;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-image {
+    grid-column: span 12 / span 12;
+  }
+  
+  .button {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
