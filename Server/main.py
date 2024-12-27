@@ -23,7 +23,8 @@ app.include_router(user_router, prefix="/user", tags=["user"])
 
 # Autoriser l'origine spécifique de votre frontend
 origins = [
-    "http://localhost:5173",  # Ajoutez l'URL de votre frontend React
+    "http://localhost:5173",
+    "https://tourism-ia-planner-production-client.onrender.com"
 ]
 
 app.add_middleware(
