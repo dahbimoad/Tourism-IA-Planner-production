@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://tourism-ia-planner-production.onrender.com/';
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 export const getMessageFromAPI = async () => {
