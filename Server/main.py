@@ -8,6 +8,7 @@ Base.metadata.create_all(bind=engine)
 from app.controllers.preferencesController import router as preferences_router
 from app.controllers.VilleController import router as villes_router
 from app.db.database import Base, engine
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 logging.basicConfig()
 logging.getLogger('sqlalchemy').setLevel(logging.INFO)
@@ -22,14 +23,26 @@ app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 #/user/signup
 
 
+# Autoriser l'origine spécifique de votre frontend
+origins = [
+    "http://localhost:5173",
+    "https://tourism-ia-planner-production-client.onrender.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Liste des origines autorisées
+    allow_credentials=True,
+    allow_methods=["*"],  # Autorise toutes les méthodes HTTP
+    allow_headers=["*"],  # Autorise tous les en-têtes
+)
+
 @app.on_event("startup")
 def startup_event():
     Base.metadata.create_all(bind=engine)
 
 
-@app.get("/")
-def read_root():
-    return {"message": "salam 3alaykummmmm"}
+
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
