@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.routes.auth_routes import router as user_router
+from app.routes.auth_routes import router as auth_router
 from app.db.database import engine, Base
 
 # Create tables in the database
@@ -17,13 +18,15 @@ app = FastAPI()
 
 # Include user-related routes
 app.include_router(user_router, prefix="/user", tags=["user"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
-
+#get userById 
 
 # Autoriser l'origine spécifique de votre frontend
 origins = [
-    "http://localhost:5173",  # Ajoutez l'URL de votre frontend React
+    "http://localhost:5173",
+    "https://tourism-ia-planner-production-client.onrender.com"
 ]
 
 app.add_middleware(
