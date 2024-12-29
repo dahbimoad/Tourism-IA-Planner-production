@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import UserInterface from "./pages/UserInterface";
 import Form from "./components/Form";
 import Plans from "./components/Plans";
+import Plan from "./components/Plan";
+import FavouritesPlans from "./components/FavouritesPlans";
 
 const App = () => {
   return (
@@ -32,6 +34,8 @@ const App = () => {
           <Route path="/dashboard1" element={<UserInterface />}>
             <Route path="form" element={<Form />} />
             <Route path="plans" element={<Plans />} />
+            <Route path="plan" element={<Plan />} />
+            <Route path="FavouritesPlans" element={<FavouritesPlans />} />
           </Route>
         </Routes>
       </Router>

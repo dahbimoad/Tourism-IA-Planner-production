@@ -53,7 +53,7 @@ const TravelPlanForm = () => {
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-6xl">
         <div className="px-8 py-6">
           <h2 className="text-3xl font-bold text-start text-gray-800 mb-8">
-            Let’s make a <span className="text-[#8DD3BB]">plan</span> for you:
+            Let’s Make a <span className="text-[#8DD3BB]">Plan</span> For You:
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Departure City */}
