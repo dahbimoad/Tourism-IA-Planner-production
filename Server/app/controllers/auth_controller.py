@@ -1,10 +1,11 @@
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.models import User
 from app.schemas.user import UserCreate, UserLogin
 from app.core.security import hash_password, verify_password, create_access_token, verify_token
 from app.db.database import get_db
 from datetime import timedelta
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
 
@@ -44,23 +45,47 @@ def signin(user: UserLogin, db: Session):
 
     # Create JWT token
     access_token = create_access_token(
-        data={"sub": db_user.email},
+          data = {
+        "sub": user.email,  # L'email de l'utilisateur
+         "id": db_user.id  # L'ID de l'utilisateur récupéré de la base de données
+    },
         expires_delta=timedelta(minutes=30)  # Token expires after 30 minutes
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# Function to get the current user from the token
-def get_current_user(token: str = Depends(get_db)):
-    payload = verify_token(token)
-    email = payload.get("sub")
-    if email is None:
-        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
-    db = next(get_db())  # Get the database session
-    user = db.query(User).filter(User.email == email).first()
+
+security = HTTPBearer()  # Déclare un schéma de sécurité pour le token
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    token = credentials.credentials
+    print(f"Extracted token: {token}")
+    
+    try:
+        payload = verify_token(token)
+    except HTTPException as e:
+        print(f"Error verifying token: {e.detail}")
+        raise e
+
+    email = payload.get("sub")
+    id = payload.get("id")
+
+    if not email or not id:
+        print(f"Invalid token: missing user data (sub: {email}, id: {id})")
+        raise HTTPException(status_code=401, detail="Invalid credentials in token")
+
+    print(f"Payload: sub={email}, id={id}")
+
+    # Search user in database using id or email
+    user = db.query(User).filter(User.id == id, User.email == email).first()
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        print(f"User not found in database: {email}, id={id}")
+        raise HTTPException(status_code=404, detail="User not found in database")
 
     return user
+

@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.services.PlansService import createPlansService 
+from app.controllers.auth_controller import get_current_user
 from app.services.preferencesService import createPreferenceService,getPreferencesService,getPreferencesById,deletePreferenceById,updatePreferenceService
 from pydantic import BaseModel,root_validator
 from datetime import datetime
 from fastapi import HTTPException
 from typing import Optional
+from app.db.models import User
 
 
 router = APIRouter()
@@ -18,7 +20,6 @@ class PreferencesCreate(BaseModel):
     dateDepart: datetime
     dateRetour: datetime
     budget: float
-    userId: int
 
     
     #Validation de la date entrer par le User;
@@ -40,30 +41,40 @@ class PreferencesCreate(BaseModel):
         return values
 
 
-
 @router.post("/preferences/")
-def createPreference(preference: PreferencesCreate,db: Session = Depends(get_db)):
-    
-    newPlan = createPlansService(db = db )
+def createPreference(
+    preference: PreferencesCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)  
+):
+   
+    user_id = current_user.id
+
+ 
+    newPlan = createPlansService(db=db)
+
     
     newPref = createPreferenceService(
-    db = db,
-    lieuDepart = preference.lieuDepart,
-    cities = preference.cities,
-    dateDepart = preference.dateDepart,
-    dateRetour = preference.dateRetour,
-    budget = preference.budget,
-    idPlan= newPlan.id,
-    userId= preference.userId
+        db=db,
+        lieuDepart=preference.lieuDepart,
+        cities=preference.cities,
+        dateDepart=preference.dateDepart,
+        dateRetour=preference.dateRetour,
+        budget=preference.budget,
+        idPlan=newPlan.id,
+        userId=user_id  
     )
 
-    return {"message": "Preference created successfully", "preference": {
-        "id": newPref.id,
-        "lieuDepart": newPref.lieuDepart,
-        "budget": newPref.budget,
-        "idPlan": newPref.idPlan,
-        "userId": newPref.userId
-    }}
+    return {
+        "message": "Preference created successfully",
+        "preference": {
+            "id": newPref.id,
+            "lieuDepart": newPref.lieuDepart,
+            "budget": newPref.budget,
+            "idPlan": newPref.idPlan,
+            "userId": newPref.userId
+        }
+    }
 
 @router.get("/preferences/")
 def getAll(db: Session = Depends(get_db)):
