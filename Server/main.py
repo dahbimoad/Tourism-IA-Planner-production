@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routes.auth_routes import router as user_router
 from app.routes.auth_routes import router as auth_router
+from app.routes.auth_routes import router as auth_router
 from app.db.database import engine, Base
 
 # Create tables in the database
@@ -18,6 +19,7 @@ app = FastAPI()
 
 # Include user-related routes
 app.include_router(user_router, prefix="/user", tags=["user"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
@@ -43,3 +45,4 @@ def startup_event():
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
+
