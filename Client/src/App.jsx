@@ -5,7 +5,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { AuthProvider } from './contexts/AuthContext';
-import Dashboard from "./pages/Dashboard";
+import { PreferencesProvider  } from './contexts/PreferencesContext'; // Import du UsersProvider
 import UserInterface from "./pages/UserInterface";
 import Form from "./components/Form";
 import Plans from "./components/Plans";
@@ -13,28 +13,34 @@ import Plans from "./components/Plans";
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/dashboard1" element={<UserInterface />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          {/* Protecting /dashboard with PrivateRoute */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          {/* Add more routes here */}
-          <Route path="/dashboard1" element={<UserInterface />}>
-            <Route path="form" element={<Form />} />
-            <Route path="plans" element={<Plans />} />
-          </Route>
-        </Routes>
-      </Router>
+      <PreferencesProvider>{/* Enveloppement avec UsersProvider */}
+        <Router>
+          <Routes>
+            {/* Route principale */}
+            <Route path="/" element={<Home />} />
+            
+            {/* Routes d'authentification */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+
+            {/* Route protégée pour /dashboard1 */}
+            <Route
+              path="/dashboard1"
+              element={
+                <PrivateRoute>
+                  <UserInterface />
+                </PrivateRoute>
+              }
+            >
+              {/* Routes imbriquées sous /dashboard1 */}
+              <Route path="form" element={<Form />} />
+              <Route path="plans" element={<Plans />} />
+            </Route>
+
+            {/* Vous pouvez ajouter d'autres routes ici */}
+          </Routes>
+        </Router>
+        </PreferencesProvider>
     </AuthProvider>
   );
 };
