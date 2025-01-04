@@ -30,7 +30,7 @@ app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://localhost:5174"],
+    allow_origins=["http://localhost:5173","http://localhost:5174","https://touristai.online","https://tourism-ia-planner-production-client.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
