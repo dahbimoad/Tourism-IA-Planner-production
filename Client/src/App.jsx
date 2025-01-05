@@ -12,7 +12,7 @@ import Plans from "./components/Plans";
 
 const App = () => {
   return (
-    <AuthProvider>
+    
       <PreferencesProvider>{/* Enveloppement avec UsersProvider */}
         <Router>
           <Routes>
@@ -41,7 +41,7 @@ const App = () => {
           </Routes>
         </Router>
         </PreferencesProvider>
-    </AuthProvider>
+   
   );
 };
 
