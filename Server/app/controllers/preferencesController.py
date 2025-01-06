@@ -47,7 +47,7 @@ def createPreference(
 ):
     user_id = current_user.id
 
-    newPlan = createPlansService(db=db)
+    newPlan = createPlansService(db=db,userId=user_id)
 
     newPref = createPreferenceService(
         db=db,

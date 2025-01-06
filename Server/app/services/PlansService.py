@@ -5,9 +5,10 @@ from datetime import datetime
 
 
 
-def createPlansService(db : Session):
+def createPlansService(db : Session,id: int):
     newPlan = Plans(
-        dateCreation=datetime.now()  
+        dateCreation=datetime.now(),  
+        idUser = id
     )
 
     db.add(newPlan)

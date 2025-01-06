@@ -9,7 +9,9 @@ class Plans(Base):
     id = Column(Integer, primary_key=True, index=True)
     dateCreation = Column(Date)
     preference = relationship("Preferences", back_populates="plan", uselist=False)
-    userPlans = relationship("UserPlan", back_populates="plan")  # Relation ajoutée pour UserPlan
+    userPlans = relationship("UserPlan", back_populates="plan")
+    idUser = Column(Integer, ForeignKey("users.id"), nullable=False)  
+    user = relationship("User", back_populates="plans")  
 
 
 class Preferences(Base):
@@ -41,7 +43,7 @@ class User(Base):
     email = Column(String)
     password = Column(String)
     preferences = relationship("Preferences", back_populates="user")
-
+    plans = relationship("Plans", back_populates="user")  # Relation vers Plans
 
 class Villes(Base):
     __tablename__ = "villes"
@@ -98,13 +100,12 @@ class Hotels(Base):
 class VilleItineraire(Base):
     __tablename__ = "ville_itineraire"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)  
     idVille = Column(Integer, ForeignKey("villes.id"), nullable=False)
     idItineraire = Column(Integer, ForeignKey("itineraires.id"), nullable=False)
-    userPlans = relationship("UserPlan", back_populates="villeItineraire")
 
     __table_args__ = (
-        UniqueConstraint('id', name='uq_ville_itineraire_id'),
+        UniqueConstraint('idVille', 'idItineraire', name='uq_ville_itineraire'),  
     )
 
 
@@ -114,8 +115,14 @@ class UserPlan(Base):
     idPlan = Column(Integer, ForeignKey("plans.id"), primary_key=True)
     idVilleItineraire = Column(Integer, ForeignKey("ville_itineraire.id"), primary_key=True)
 
+    # Définir la clé primaire composite
+    __table_args__ = (
+        PrimaryKeyConstraint('idPlan', 'idVilleItineraire', name='pk_user_plan'),  # Clé primaire composite
+    )
+
     plan = relationship("Plans", back_populates="userPlans")
     villeItineraire = relationship("VilleItineraire", back_populates="userPlans")
+
 
 
 class LieuxToVisit(Base):
