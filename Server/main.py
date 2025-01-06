@@ -3,7 +3,7 @@ from app.routes.auth_routes import router as user_router
 from app.routes.auth_routes import router as auth_router
 from app.db.database import engine, Base, SessionLocal
 from app.db.models import Villes
-
+from app.Ai.AI import router as plans_router
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -23,7 +23,8 @@ app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
-#get userById 
+#get userById
+app.include_router(plans_router, prefix="/ai", tags=["Plans"])
 
 
 
