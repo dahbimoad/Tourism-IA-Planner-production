@@ -12,6 +12,7 @@ class Plans(Base):
     userPlans = relationship("UserPlan", back_populates="plan")
     idUser = Column(Integer, ForeignKey("users.id"), nullable=False)  
     user = relationship("User", back_populates="plans")  
+    
 
 
 class Preferences(Base):
@@ -107,6 +108,7 @@ class VilleItineraire(Base):
     __table_args__ = (
         UniqueConstraint('idVille', 'idItineraire', name='uq_ville_itineraire'),  
     )
+    userPlans = relationship("UserPlan", back_populates="villeItineraire")
 
 
 class UserPlan(Base):
