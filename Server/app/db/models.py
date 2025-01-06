@@ -1,22 +1,22 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float,UniqueConstraint
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base
-from sqlalchemy import PrimaryKeyConstraint
 
 
 class Plans(Base):
     __tablename__ = "plans"
 
     id = Column(Integer, primary_key=True, index=True)
-    dateCreation = Column(Date) 
+    dateCreation = Column(Date)
     preference = relationship("Preferences", back_populates="plan", uselist=False)
+    userPlans = relationship("UserPlan", back_populates="plan")  # Relation ajoutée pour UserPlan
 
 
 class Preferences(Base):
     __tablename__ = "preferences"
 
-    id = Column(Integer, autoincrement=True)  # La colonne id reste autoincrémentée
-    lieuDepart = Column(String)  # fait partie de la clé composite
+    id = Column(Integer, autoincrement=True)
+    lieuDepart = Column(String)
     budget = Column(Float)
     dateDepart = Column(Date)
     dateRetour = Column(Date)
@@ -27,10 +27,10 @@ class Preferences(Base):
     villes = relationship("LieuxToVisit", back_populates="preference")
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'lieuDepart'),  
-       
+        PrimaryKeyConstraint('id', 'lieuDepart'),
         UniqueConstraint('id'),
     )
+
 
 class User(Base):
     __tablename__ = "users"
@@ -62,22 +62,27 @@ class Activities(Base):
     nom = Column(String)
     description = Column(String)
     cout = Column(Float)
-    adresse = Column(String) 
-    idVille = Column(Integer, ForeignKey("villes.id"))  
+    adresse = Column(String)
+    idVille = Column(Integer, ForeignKey("villes.id"))
     ville = relationship("Villes", back_populates="activities")
+    itineraries = relationship("Itineraires", back_populates="activity")  # Relation ajoutée
 
 
 class Itineraires(Base):
     __tablename__ = "itineraires"
 
     id = Column(Integer, primary_key=True, index=True)
-    description = Column(String)
-    budget = Column(Float)
+    id_activite = Column(Integer, ForeignKey("activities.id", ondelete="SET NULL"), nullable=True)
+    id_hotel = Column(Integer, ForeignKey("hotels.id", ondelete="SET NULL"), nullable=True)
+    time_spent_by_ville = Column(Float, nullable=False)
+    budget = Column(Float, nullable=False)
+
     villes = relationship("Villes", secondary="ville_itineraire", back_populates="itineraries")
+    activity = relationship("Activities", back_populates="itineraries", foreign_keys=[id_activite])
+    hotel = relationship("Hotels", back_populates="itineraries", foreign_keys=[id_hotel])
 
 
 class Hotels(Base):
-
     __tablename__ = "hotels"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -87,13 +92,30 @@ class Hotels(Base):
     cout = Column(Float)
     idVille = Column(Integer, ForeignKey("villes.id"))
     ville = relationship("Villes", back_populates="hotels")
+    itineraries = relationship("Itineraires", back_populates="hotel")  # Relation ajoutée
 
 
-class VilleItineraire(Base): 
+class VilleItineraire(Base):
     __tablename__ = "ville_itineraire"
 
-    idVille = Column(Integer, ForeignKey("villes.id"), primary_key=True)  
-    idItineraire = Column(Integer, ForeignKey("itineraires.id"), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    idVille = Column(Integer, ForeignKey("villes.id"), nullable=False)
+    idItineraire = Column(Integer, ForeignKey("itineraires.id"), nullable=False)
+    userPlans = relationship("UserPlan", back_populates="villeItineraire")
+
+    __table_args__ = (
+        UniqueConstraint('id', name='uq_ville_itineraire_id'),
+    )
+
+
+class UserPlan(Base):
+    __tablename__ = "user_plan"
+
+    idPlan = Column(Integer, ForeignKey("plans.id"), primary_key=True)
+    idVilleItineraire = Column(Integer, ForeignKey("ville_itineraire.id"), primary_key=True)
+
+    plan = relationship("Plans", back_populates="userPlans")
+    villeItineraire = relationship("VilleItineraire", back_populates="userPlans")
 
 
 class LieuxToVisit(Base):
