@@ -4,7 +4,7 @@ from app.db.database import get_db
 from app.services.PlansService import createPlansService
 from app.controllers.auth_controller import get_current_user
 from app.services.preferencesService import createPreferenceService, getPreferencesService, getPreferencesById, \
-    deletePreferenceById, updatePreferenceService
+    deletePreferenceById, updatePreferenceService,PreferenceToAi
 from pydantic import BaseModel, root_validator
 from datetime import datetime
 from fastapi import HTTPException
@@ -59,6 +59,7 @@ def createPreference(
         idPlan=newPlan.id,
         userId=user_id
     )
+    ai_data = PreferenceToAi(preference)
 
     return {
         "message": "Preference created successfully",
@@ -68,7 +69,8 @@ def createPreference(
             "budget": newPref.budget,
             "idPlan": newPref.idPlan,
             "userId": newPref.userId
-        }
+        },
+        "ai_data":ai_data
     }
 
 
