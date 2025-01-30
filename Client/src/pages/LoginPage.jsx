@@ -23,7 +23,7 @@ const LoginPage = () => {
     const result = await login({ email, password });
     if (result) {
       // Si tout se passe bien, on redirige
-      navigate("/dashboard");
+      navigate("/dashboard1/form");
     } else {
       // Sinon, on affiche un message d’erreur
       setError("Invalid credentials");

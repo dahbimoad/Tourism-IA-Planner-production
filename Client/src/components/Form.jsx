@@ -6,7 +6,12 @@ import {
   FaWallet,
 } from "react-icons/fa";
 
+// On importe notre hook créé
+import { usePreferences } from '../contexts/PreferencesContext';// adapter le chemin d'import
+
 const TravelPlanForm = () => {
+  const { handleCreatePreference } = usePreferences(); // On récupère la fonction du contexte
+
   const [departureCity, setDepartureCity] = useState("");
   const [citiesToVisit, setCitiesToVisit] = useState([]);
   const [departureDate, setDepartureDate] = useState("");
@@ -29,24 +34,62 @@ const TravelPlanForm = () => {
     if (city && !citiesToVisit.includes(city)) {
       setCitiesToVisit([...citiesToVisit, city]);
     }
-    e.target.value = ""; // Reset the select to placeholder
+    e.target.value = ""; // Reset la sélection
   };
 
   const handleRemoveCity = (cityToRemove) => {
     setCitiesToVisit(citiesToVisit.filter((city) => city !== cityToRemove));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({
-      departureCity,
-      citiesToVisit,
-      departureDate,
-      returnDate,
-      budget,
-    });
-    // You can add further form submission logic here
+// Dans votre TravelPlanForm.jsx
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Validations
+  if (!departureCity) {
+    alert("Veuillez choisir une ville de départ");
+    return;
+  }
+  if (citiesToVisit.length === 0) {
+    alert("Veuillez sélectionner au moins une ville à visiter");
+    return;
+  }
+  if (!departureDate) {
+    alert("Veuillez sélectionner une date de départ");
+    return;
+  }
+  if (!returnDate) {
+    alert("Veuillez sélectionner une date de retour");
+    return;
+  }
+  if (!budget || parseFloat(budget) <= 0) {
+    alert("Veuillez entrer un budget valide");
+    return;
+  }
+
+  const preferenceData = {
+    lieuDepart: departureCity,
+    cities: citiesToVisit,
+    dateDepart: departureDate,
+    dateRetour: returnDate,
+    budget: parseFloat(budget)
   };
+
+  try {
+    const response = await handleCreatePreference(preferenceData);
+    console.log('Création réussie :', response);
+    // Réinitialiser le formulaire
+    setDepartureCity('');
+    setCitiesToVisit([]);
+    setDepartureDate('');
+    setReturnDate('');
+    setBudget('');
+    alert('Préférences créées avec succès !');
+  } catch (error) {
+    console.error('Erreur lors de la création :', error);
+    alert(error.message || 'Une erreur est survenue lors de la création de la préférence.');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 px-4 sm:px-6 lg:px-8">
