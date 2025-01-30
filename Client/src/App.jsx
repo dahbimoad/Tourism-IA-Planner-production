@@ -41,7 +41,7 @@ const App = () => {
           </Routes>
         </Router>
         </PreferencesProvider>
-    </AuthProvider>
+   </AuthProvider>
   );
 };
 
