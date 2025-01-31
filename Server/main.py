@@ -3,7 +3,9 @@ from app.routes.auth_routes import router as user_router
 from app.routes.auth_routes import router as auth_router
 from app.db.database import engine, Base, SessionLocal
 from app.db.models import Villes
-from app.Ai.AI import router as plans_router
+from app.Ai.router import plans_router
+from app.controllers.trip_controller import router as trip_router
+from app.services.trip_planner import TripPlannerService
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -19,12 +21,14 @@ logging.getLogger('sqlalchemy').setLevel(logging.INFO)
 app = FastAPI()
 
 # Include user-related routes
+app.include_router(trip_router)
 app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
 #get userById
-app.include_router(plans_router, prefix="/ai", tags=["Plans"])
+# In your main FastAPI app
+app.include_router(plans_router, prefix="/generate-plans", tags=["Plans"])
 
 
 
