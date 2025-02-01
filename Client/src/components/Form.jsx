@@ -1,17 +1,18 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   FaPlane,
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaWallet,
+  FaSpinner,
 } from "react-icons/fa";
-
-// On importe notre hook créé
-import { usePreferences } from '../contexts/PreferencesContext';// adapter le chemin d'import
+import { usePreferences } from '../contexts/PreferencesContext';
 
 const TravelPlanForm = () => {
-  const { handleCreatePreference } = usePreferences(); // On récupère la fonction du contexte
-
+  const { handleCreatePreference } = usePreferences();
+  const navigate = useNavigate(); // Initialisation du hook
+  const [isLoading, setIsLoading] = useState(false);
   const [departureCity, setDepartureCity] = useState("");
   const [citiesToVisit, setCitiesToVisit] = useState([]);
   const [departureDate, setDepartureDate] = useState("");
@@ -34,62 +35,62 @@ const TravelPlanForm = () => {
     if (city && !citiesToVisit.includes(city)) {
       setCitiesToVisit([...citiesToVisit, city]);
     }
-    e.target.value = ""; // Reset la sélection
+    e.target.value = "";
   };
 
   const handleRemoveCity = (cityToRemove) => {
     setCitiesToVisit(citiesToVisit.filter((city) => city !== cityToRemove));
   };
 
-// Dans votre TravelPlanForm.jsx
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Validations
-  if (!departureCity) {
-    alert("Veuillez choisir une ville de départ");
-    return;
-  }
-  if (citiesToVisit.length === 0) {
-    alert("Veuillez sélectionner au moins une ville à visiter");
-    return;
-  }
-  if (!departureDate) {
-    alert("Veuillez sélectionner une date de départ");
-    return;
-  }
-  if (!returnDate) {
-    alert("Veuillez sélectionner une date de retour");
-    return;
-  }
-  if (!budget || parseFloat(budget) <= 0) {
-    alert("Veuillez entrer un budget valide");
-    return;
-  }
+    if (!departureCity) {
+      alert("Veuillez choisir une ville de départ");
+      return;
+    }
+    if (citiesToVisit.length === 0) {
+      alert("Veuillez sélectionner au moins une ville à visiter");
+      return;
+    }
+    if (!departureDate) {
+      alert("Veuillez sélectionner une date de départ");
+      return;
+    }
+    if (!returnDate) {
+      alert("Veuillez sélectionner une date de retour");
+      return;
+    }
+    if (!budget || parseFloat(budget) <= 0) {
+      alert("Veuillez entrer un budget valide");
+      return;
+    }
 
-  const preferenceData = {
-    lieuDepart: departureCity,
-    cities: citiesToVisit,
-    dateDepart: departureDate,
-    dateRetour: returnDate,
-    budget: parseFloat(budget)
+    const preferenceData = {
+      lieuDepart: departureCity,
+      cities: citiesToVisit,
+      dateDepart: departureDate,
+      dateRetour: returnDate,
+      budget: parseFloat(budget)
+    };
+
+    setIsLoading(true);
+    try {
+      const response = await handleCreatePreference(preferenceData);
+      console.log('Création réussie :', response);
+      setDepartureCity('');
+      setCitiesToVisit([]);
+      setDepartureDate('');
+      setReturnDate('');
+      setBudget('');
+      navigate('/dashboard1/plans');
+    } catch (error) {
+      console.error('Erreur lors de la création :', error);
+      alert(error.message || 'Une erreur est survenue lors de la création de la préférence.');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  try {
-    const response = await handleCreatePreference(preferenceData);
-    console.log('Création réussie :', response);
-    // Réinitialiser le formulaire
-    setDepartureCity('');
-    setCitiesToVisit([]);
-    setDepartureDate('');
-    setReturnDate('');
-    setBudget('');
-    alert('Préférences créées avec succès !');
-  } catch (error) {
-    console.error('Erreur lors de la création :', error);
-    alert(error.message || 'Une erreur est survenue lors de la création de la préférence.');
-  }
-};
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 px-4 sm:px-6 lg:px-8">
@@ -126,7 +127,6 @@ const handleSubmit = async (e) => {
                 <FaMapMarkerAlt className="h-5 w-5 text-gray-400 mt-2" />
               </div>
               <div className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-[#030303ae] focus-within:border-[#0808087e]">
-                {/* Selected Cities as Tags */}
                 <div className="flex flex-wrap gap-2">
                   {citiesToVisit.map((city, index) => (
                     <span
@@ -144,7 +144,6 @@ const handleSubmit = async (e) => {
                     </span>
                   ))}
                 </div>
-                {/* Dropdown to Add More Cities */}
                 <select
                   onChange={handleAddCity}
                   className="block w-full mt-2  border-none bg-white placeholder-gray-500 focus:outline-none h-6"
@@ -224,9 +223,17 @@ const handleSubmit = async (e) => {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-[#8DD3BB] hover:bg-[#0c0404] hover:text-[#ffffff] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0c0404] transition-colors duration-200 h-12"
+                disabled={isLoading}
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-[#8DD3BB] hover:bg-[#0c0404] hover:text-[#ffffff] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0c0404] transition-colors duration-200 h-12 disabled:opacity-75"
               >
-                Generate your plan
+                {isLoading ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate your plan"
+                )}
               </button>
             </div>
           </form>
