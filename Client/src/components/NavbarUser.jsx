@@ -48,7 +48,7 @@ const NavbarUser = () => {
               <a href="/dashboard1/plans">Plans</a>
             </li>
             <li>
-              <a href="/t">Favourites</a>
+              <a href="/dashboard1/FavouritesPlans">Favourites</a>
             </li>
           </ul>
         </div>
@@ -75,7 +75,7 @@ const NavbarUser = () => {
             </li>
             <li>
               <a
-                href="/"
+                href="/dashboard1/FavouritesPlans"
                 className="line-under hover:bg-transparent"
               >
                 Favourites
