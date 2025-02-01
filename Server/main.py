@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from app.routes.auth_routes import router as user_router
 from app.routes.auth_routes import router as auth_router
+from app.routes.auth_routes import router as auth_router
 from app.db.database import engine, Base, SessionLocal
 from app.db.models import Villes
-
+from app.Ai.router import plans_router
+from app.controllers.trip_controller import router as trip_router
+from app.services.trip_planner import TripPlannerService
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -19,11 +22,14 @@ logging.getLogger('sqlalchemy').setLevel(logging.INFO)
 app = FastAPI()
 
 # Include user-related routes
+app.include_router(trip_router)
 app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
  #/user/signin
 #/user/signup
-#get userById 
+#get userById
+# In your main FastAPI app
+app.include_router(plans_router, prefix="/generate-plans", tags=["Plans"])
 
 
 
@@ -39,14 +45,14 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     Base.metadata.create_all(bind=engine)
-    
+
     # Create a new session
     db = SessionLocal()
-    
+
     try:
         # Check if data already exists to avoid duplicate insertions
         existing_cities = db.query(Villes).first()
-        
+
         if not existing_cities:
             # Initial cities data
             initial_cities = [
@@ -59,18 +65,18 @@ def startup_event():
                 Villes(nom="Chefchaouen", budget=800),
                 Villes(nom="Essaouira", budget=900)
             ]
-            
+
             # Add all cities
             db.add_all(initial_cities)
-            
+
             # Commit the changes
             db.commit()
             print("Initial cities data has been added successfully!")
-        
+
     except Exception as e:
         print(f"Error adding initial data: {e}")
         db.rollback()
-    
+
     finally:
         db.close()
 
@@ -79,3 +85,4 @@ def startup_event():
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
+

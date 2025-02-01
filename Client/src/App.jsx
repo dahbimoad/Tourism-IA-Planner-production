@@ -9,6 +9,8 @@ import { PreferencesProvider  } from './contexts/PreferencesContext'; // Import 
 import UserInterface from "./pages/UserInterface";
 import Form from "./components/Form";
 import Plans from "./components/Plans";
+import Plan from "./components/Plan";
+import FavouritesPlans from "./components/FavouritesPlans";
 
 const App = () => {
   return (
@@ -34,7 +36,9 @@ const App = () => {
             >
               {/* Routes imbriquées sous /dashboard1 */}
               <Route path="form" element={<Form />} />
-              <Route path="plans" element={<Plans />} />
+            <Route path="plans" element={<Plans />} />
+            <Route path="plan" element={<Plan />} />
+            <Route path="FavouritesPlans" element={<FavouritesPlans />} />
             </Route>
 
             {/* Vous pouvez ajouter d'autres routes ici */}
@@ -46,3 +50,5 @@ const App = () => {
 };
 
 export default App;
+
+

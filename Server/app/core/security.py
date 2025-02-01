@@ -1,3 +1,5 @@
+from http.client import HTTPException
+
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
