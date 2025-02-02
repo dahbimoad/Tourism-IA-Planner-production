@@ -7,9 +7,10 @@ from app.services.VilleService import getVilleIdByName
 
 
 
+
 def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],dateDepart: str, dateRetour: str,budget: float, idPlan: int, userId:int):
     
-    
+    global last_created_preference
     newPref = Preferences(
         lieuDepart = lieuDepart,
         dateDepart = dateDepart,
@@ -32,6 +33,9 @@ def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],da
         )
         db.add(newLieu)
         db.commit()
+        city_storage[city] = city 
+
+    last_created_preference = newPref
 
 
     return newPref
