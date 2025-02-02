@@ -19,6 +19,9 @@ def authenticate_user_service(user: UserCreate, db: Session):
 
 
 def update_user_profile(db: Session, user_id: int, user_data: UserUpdate):
+    """
+    Update user profile with validation for empty fields and proper error handling
+    """
     try:
         # Get the user from database
         db_user = db.query(User).filter(User.id == user_id).first()
@@ -31,36 +34,70 @@ def update_user_profile(db: Session, user_id: int, user_data: UserUpdate):
                 }
             )
 
-        # Check if email is being updated and if it's already taken
-        if user_data.email and user_data.email != db_user.email:
-            existing_user = db.query(User).filter(User.email == user_data.email).first()
-            if existing_user:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={
-                        "message": "Email already registered",
-                        "code": "EMAIL_TAKEN",
-                        "field": "email"
-                    }
-                )
+        # Convert model to dict and filter out None and empty string values
+        update_data = {
+            key: value for key, value in user_data.dict(exclude_unset=True).items()
+            if value is not None and value.strip() != "" if isinstance(value, str)
+        }
 
-        # Update user fields
-        update_data = user_data.dict(exclude_unset=True)
+        # Check if there are any valid fields to update
         if not update_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
-                    "message": "No valid fields to update",
-                    "code": "NO_UPDATE_DATA"
+                    "message": "No valid fields provided for update. Fields cannot be empty.",
+                    "code": "NO_VALID_UPDATE_DATA"
                 }
             )
 
-        for field, value in update_data.items():
-            setattr(db_user, field, value)
+        # Validate email if it's being updated
+        if 'email' in update_data:
+            # Check email format
+            if not update_data['email'] or not '@' in update_data['email']:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "message": "Invalid email format",
+                        "code": "INVALID_EMAIL_FORMAT",
+                        "field": "email"
+                    }
+                )
+
+            # Check if email is already taken
+            if update_data['email'] != db_user.email:
+                existing_user = db.query(User).filter(User.email == update_data['email']).first()
+                if existing_user:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={
+                            "message": "Email already registered",
+                            "code": "EMAIL_TAKEN",
+                            "field": "email"
+                        }
+                    )
+
+        # Validate name fields
+        for field in ['nom', 'prenom']:
+            if field in update_data:
+                if len(update_data[field].strip()) < 2:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={
+                            "message": f"{field.capitalize()} must be at least 2 characters long",
+                            "code": f"INVALID_{field.upper()}_LENGTH",
+                            "field": field
+                        }
+                    )
 
         try:
+            # Update user fields with validated data
+            for field, value in update_data.items():
+                setattr(db_user, field, value)
+
             db.commit()
             db.refresh(db_user)
+
+            # Return the user model object directly
             return db_user
 
         except IntegrityError as e:
@@ -87,7 +124,6 @@ def update_user_profile(db: Session, user_id: int, user_data: UserUpdate):
 
     except HTTPException:
         raise
-
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -97,8 +133,6 @@ def update_user_profile(db: Session, user_id: int, user_data: UserUpdate):
                 "error": str(e)
             }
         )
-
-
 def update_user_password(db: Session, user_id: int, password_data: PasswordUpdate):
     """Update user password with validation"""
     try:
