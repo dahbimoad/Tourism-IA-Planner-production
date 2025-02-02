@@ -13,19 +13,19 @@ from app.services.preferencesService import (
 )
 from app.db.models import User
 from app.Ai.AI import generate_plans ,PlanRequest
-  # Import from the shared module
+ 
 
 router = APIRouter()
 
-# Define the PreferencesCreate model
+
 class PreferencesCreate(BaseModel):
     lieuDepart: str
     cities: List[str]
-    dateDepart: str  # Changed to string for consistency
-    dateRetour: str  # Changed to string for consistency
+    dateDepart: str  
+    dateRetour: str  
     budget: float
 
-    # Validation for dates
+    
     @root_validator(pre=True)
     def check_dates(cls, values):
         date_depart = values.get('dateDepart')
@@ -42,7 +42,7 @@ class PreferencesCreate(BaseModel):
 
         return values
 
-# Define the PreferencesUpdate model
+
 class PreferencesUpdate(BaseModel):
     lieuDepart: Optional[str] = None
     cities: Optional[List[str]] = None
@@ -69,7 +69,7 @@ class PreferencesUpdate(BaseModel):
 
         return values
 
-# Create a new preference and generate plans
+
 @router.post("/preferences/")
 def createPreference(
         preference: PreferencesCreate,
@@ -126,7 +126,7 @@ def createPreference(
         },
         "generated_plans": generated_plans
     }
-# Get all preferences
+
 @router.get("/preferences/")
 def getAll(db: Session = Depends(get_db)):
     preferences = getPreferencesService(db)
@@ -147,7 +147,7 @@ def getAll(db: Session = Depends(get_db)):
     }
 
 
-# Get a preference by ID
+
 @router.get("/preferences/{id}")
 def getById(id: int, db: Session = Depends(get_db)):
     preference = getPreferencesById(db, id)
@@ -167,7 +167,7 @@ def getById(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Preference not found")
 
 
-# Delete a preference by ID
+
 @router.delete("/preferences/{id}")
 def deletePreference(id: int, db: Session = Depends(get_db)):
     deleted_preference = deletePreferenceById(db, id)
@@ -189,13 +189,10 @@ def deletePreference(id: int, db: Session = Depends(get_db)):
     }
 
 
-# Update a preference by ID
+
 @router.put("/preferences/{id}")
-def updatePreference(
-        id: int,
-        preference: PreferencesUpdate,
-        db: Session = Depends(get_db)
-):
+def updatePreference(id: int,preference: PreferencesUpdate,db: Session = Depends(get_db)):
+    
     updatedPr = updatePreferenceService(
         db=db,
         preference_id=id,
@@ -220,3 +217,11 @@ def updatePreference(
             "userId": updatedPr.userId
         }
     }
+
+
+@router.post("/preferencesFavori/")
+def addTofavori(
+    preference : PreferencesCreate,
+    db : Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):

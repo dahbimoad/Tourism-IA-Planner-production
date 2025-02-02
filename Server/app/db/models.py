@@ -95,7 +95,7 @@ class Hotels(Base):
     cout = Column(Float)
     idVille = Column(Integer, ForeignKey("villes.id"))
     ville = relationship("Villes", back_populates="hotels")
-    itineraries = relationship("Itineraires", back_populates="hotel")  # Relation ajoutée
+    itineraries = relationship("Itineraires", back_populates="hotel")  
 
 
 class VilleItineraire(Base):
@@ -117,9 +117,9 @@ class UserPlan(Base):
     idPlan = Column(Integer, ForeignKey("plans.id"), primary_key=True)
     idVilleItineraire = Column(Integer, ForeignKey("ville_itineraire.id"), primary_key=True)
 
-    # Définir la clé primaire composite
+    
     __table_args__ = (
-        PrimaryKeyConstraint('idPlan', 'idVilleItineraire', name='pk_user_plan'),  # Clé primaire composite
+        PrimaryKeyConstraint('idPlan', 'idVilleItineraire', name='pk_user_plan'),  
     )
 
     plan = relationship("Plans", back_populates="userPlans")
