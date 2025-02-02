@@ -11,6 +11,7 @@ from app.services.trip_planner import TripPlannerService
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
 from app.controllers.preferencesController import router as preferences_router
+from app.controllers.chatbot_controller import router as chatbot_router
 from app.controllers.VilleController import router as villes_router
 from app.db.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
@@ -85,4 +86,5 @@ def startup_event():
 
 app.include_router(preferences_router)
 app.include_router(villes_router)
+app.include_router(chatbot_router, prefix="/api/chat", tags=["chat"])
 
