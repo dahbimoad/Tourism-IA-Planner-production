@@ -27,3 +27,12 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserUpdate(BaseModel):
+    nom: str | None = None
+    prenom: str | None = None
+    email: EmailStr | None = None
+
+    class Config:
+        from_attributes = True
