@@ -1,12 +1,15 @@
+# app/services/chatbot_service.py
 import requests
 from typing import Dict, List
 from fastapi import HTTPException
-
+from app.core.config import settings
 
 class ChatbotService:
     def __init__(self):
-        self.base_url = "http://localhost:11434/api"
-        self.model = "llama3.2:1b"
+        self.base_url = settings.OLLAMA_BASE_URL
+        self.model = settings.OLLAMA_MODEL
+        self.timeout = settings.OLLAMA_TIMEOUT
+        self.max_history = settings.MAX_CONVERSATION_HISTORY
         self.conversation_history = {}
 
     async def get_response(self, user_id: str, message: str) -> Dict:
@@ -17,7 +20,7 @@ class ChatbotService:
             # Build context from conversation history
             context = "\n".join([
                 f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
-                for msg in self.conversation_history[user_id][-5:]
+                for msg in self.conversation_history[user_id][-self.max_history:]
             ])
 
             # Create a tourism-focused prompt
@@ -39,7 +42,7 @@ class ChatbotService:
                         "prompt": prompt,
                         "stream": False
                     },
-                    timeout=120
+                    timeout=self.timeout
                 )
 
                 # Print response for debugging
@@ -65,18 +68,24 @@ class ChatbotService:
                     {"role": "assistant", "content": assistant_response}
                 ])
 
+                # Trim conversation history if it exceeds max length
+                if len(self.conversation_history[user_id]) > self.max_history * 2:
+                    self.conversation_history[user_id] = (
+                        self.conversation_history[user_id][-self.max_history * 2:]
+                    )
+
                 return {
                     "response": assistant_response,
                     "status": "success"
                 }
 
             except requests.exceptions.ConnectionError:
-                error_msg = "Could not connect to Ollama. Make sure Ollama is running with: ollama run llama3.2"
+                error_msg = f"Could not connect to Ollama. Make sure Ollama is running with: ollama run {self.model}"
                 print(error_msg)
                 raise HTTPException(status_code=500, detail=error_msg)
 
             except requests.exceptions.Timeout:
-                error_msg = "Request to Ollama timed out"
+                error_msg = f"Request to Ollama timed out after {self.timeout} seconds"
                 print(error_msg)
                 raise HTTPException(status_code=500, detail=error_msg)
 
@@ -84,7 +93,6 @@ class ChatbotService:
             error_msg = f"Error in chatbot service: {str(e)}"
             print(error_msg)
             raise HTTPException(status_code=500, detail=error_msg)
-
 
 # Create a singleton instance
 chatbot_service = ChatbotService()
