@@ -33,9 +33,7 @@ def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],da
         )
         db.add(newLieu)
         db.commit()
-        city_storage[city] = city 
-
-    last_created_preference = newPref
+       
 
 
     return newPref

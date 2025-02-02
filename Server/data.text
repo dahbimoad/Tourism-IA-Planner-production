@@ -1,0 +1,10 @@
+INSERT INTO public.villes (nom, budget)
+VALUES 
+    ('Marrakech', 1000), 
+    ('Casablanca', 2000), 
+    ('Fès', 1500), 
+    ('Tangier', 1200), 
+    ('Agadir', 1300), 
+    ('Rabat', 2500), 
+    ('Chefchaouen', 800), 
+    ('Essaouira', 900);

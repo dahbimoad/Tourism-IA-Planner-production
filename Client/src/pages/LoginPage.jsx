@@ -142,7 +142,7 @@ const LoginPage = () => {
         <div className="md:block hidden w-1/2">
           <img
             className="rounded-2xl max-h-[1200px] w-[900rem] max-w-full"
-            src="../public/images/marrakech.jpg"
+            src="https://images.unsplash.com/photo-1538600838042-6a0c694ffab5?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="login form"
           />
         </div>

@@ -3,10 +3,13 @@ import { FaPlane, FaMapMarkerAlt, FaCalendarAlt, FaWallet, FaCity } from "react-
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from "react-router-dom";
+
 
 const Plans = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   const sampleTravelPlans = [
     {
@@ -38,7 +41,7 @@ const Plans = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800  py-16">Your travel plans :</h1>
+        <h1 className="text-3xl font-bold text-gray-800  py-16">Your Travel <span className="text-[#8DD3BB]">Travel </span>Plans :</h1>
         {/* Travel Plans Display */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {error ? (
@@ -76,7 +79,7 @@ const Plans = () => {
                     <FaCity className="inline mr-2" />
                     {plan.itinerary}
                   </p>
-                  <button
+                  <button onClick={() => navigate("/dashboard1/plan")}
                     className="w-full py-2 rounded-lg transition duration-300 bg-[#8DD3BB]"
                   >
                     Details
