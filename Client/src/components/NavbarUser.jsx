@@ -42,13 +42,13 @@ const NavbarUser = () => {
               <a href="/">Home</a>
             </li>
             <li>
-              <a href="/dashboard1/form">Find Plan</a>
+              <a href="/dashboard/form">Find Plan</a>
             </li>
             <li>
-              <a href="/dashboard1/plans">Plans</a>
+              <a href="/dashboard/plans">Plans</a>
             </li>
             <li>
-              <a href="/dashboard1/FavouritesPlans">Favourites</a>
+              <a href="/dashboard/FavouritesPlans">Favourites</a>
             </li>
           </ul>
         </div>
@@ -61,13 +61,13 @@ const NavbarUser = () => {
               </a>
             </li>
             <li>
-              <a href="/dashboard1/form" className="line-under hover:bg-transparent">
+              <a href="/dashboard/form" className="line-under hover:bg-transparent">
                 Find Plan
               </a>
             </li>
             <li>
               <a
-                href="/dashboard1/plans"
+                href="/dashboard/plans"
                 className="line-under hover:bg-transparent"
               >
                 Plans
@@ -75,7 +75,7 @@ const NavbarUser = () => {
             </li>
             <li>
               <a
-                href="/dashboard1/FavouritesPlans"
+                href="/dashboard/FavouritesPlans"
                 className="line-under hover:bg-transparent"
               >
                 Favourites

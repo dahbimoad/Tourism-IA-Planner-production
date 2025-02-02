@@ -1,54 +1,65 @@
+// Import de React et des outils de routage
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Import des pages principales
 import Home from "./pages/Home";
-import PrivateRoute from "./components/PrivateRoute";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import { AuthProvider } from './contexts/AuthContext';
-import { PreferencesProvider  } from './contexts/PreferencesContext'; // Import du UsersProvider
 import UserInterface from "./pages/UserInterface";
+
+// Import des composants
+import PrivateRoute from "./components/PrivateRoute";
 import Form from "./components/Form";
 import Plans from "./components/Plans";
 import Plan from "./components/Plan";
 import FavouritesPlans from "./components/FavouritesPlans";
 
+// Import des contextes pour la gestion d'état globale
+import { AuthProvider } from './contexts/AuthContext';
+import { PreferencesProvider  } from './contexts/PreferencesContext';
+
 const App = () => {
   return (
+    // AuthProvider: Gère l'état d'authentification dans toute l'application
     <AuthProvider>
-      <PreferencesProvider>{/* Enveloppement avec UsersProvider */}
+      {/* PreferencesProvider: Gère les préférences utilisateur dans toute l'application */}
+      <PreferencesProvider>
+        {/* Router: Configure le routage de l'application */}
         <Router>
+          {/* Routes: Contient toutes les routes de l'application */}
           <Routes>
-            {/* Route principale */}
+            {/* Page d'accueil accessible à tous */}
             <Route path="/" element={<Home />} />
             
-            {/* Routes d'authentification */}
+            {/* Routes pour l'authentification */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
 
-            {/* Route protégée pour /dashboard1 */}
+            {/* Dashboard protégé: nécessite une authentification */}
             <Route
-              path="/dashboard1"
+              path="/dashboard"
               element={
                 <PrivateRoute>
                   <UserInterface />
                 </PrivateRoute>
               }
             >
-              {/* Routes imbriquées sous /dashboard1 */}
+              {/* Routes imbriquées dans le dashboard */}
+              {/* Formulaire de préférences */}
               <Route path="form" element={<Form />} />
-            <Route path="plans" element={<Plans />} />
-            <Route path="plan" element={<Plan />} />
-            <Route path="FavouritesPlans" element={<FavouritesPlans />} />
+              {/* Liste des plans de voyage */}
+              <Route path="plans" element={<Plans />} />
+              {/* Détail d'un plan spécifique */}
+              <Route path="plan" element={<Plan />} />
+              {/* Plans favoris de l'utilisateur */}
+              <Route path="FavouritesPlans" element={<FavouritesPlans />} />
             </Route>
-
-            {/* Vous pouvez ajouter d'autres routes ici */}
           </Routes>
         </Router>
-        </PreferencesProvider>
-   </AuthProvider>
+      </PreferencesProvider>
+    </AuthProvider>
   );
 };
 
 export default App;
-
-

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { FaWallet, FaCalendarDay, FaMapMarkerAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "../contexts/PreferencesContext";
 import { TOURISM_IMAGES } from "../assets/tourismImages";
-
 
 const Plans = () => {
   const { generatedPlans } = usePreferences();
@@ -11,7 +10,7 @@ const Plans = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [cachedImages, setCachedImages] = useState(() => {
-    const saved = sessionStorage.getItem('planImages');
+    const saved = sessionStorage.getItem("planImages");
     return saved ? JSON.parse(saved) : {};
   });
 
@@ -19,10 +18,11 @@ const Plans = () => {
     // Réinitialiser les images si le nombre de plans change
     const newImages = {};
     generatedPlans.forEach((_, index) => {
-      newImages[index] = TOURISM_IMAGES[Math.floor(Math.random() * TOURISM_IMAGES.length)];
+      newImages[index] =
+        TOURISM_IMAGES[Math.floor(Math.random() * TOURISM_IMAGES.length)];
     });
     setCachedImages(newImages);
-    sessionStorage.setItem('planImages', JSON.stringify(newImages));
+    sessionStorage.setItem("planImages", JSON.stringify(newImages));
   }, [generatedPlans]); // Déclenché à chaque changement de `generatedPlans`
 
   const getPlanTitle = (index) => {
@@ -43,7 +43,7 @@ const Plans = () => {
         <span className="text-gray-600">{city.city}:</span>
         <span className="flex items-center">
           <FaCalendarDay className="mr-1 text-[#8DD3BB]" />
-          {city.days_spent} jour{city.days_spent > 1 ? 's' : ''}
+          {city.days_spent} jour{city.days_spent > 1 ? "s" : ""}
         </span>
       </div>
     ));
@@ -74,20 +74,24 @@ const Plans = () => {
                 className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition duration-300"
               >
                 <img
-                  src={cachedImages[index] || TOURISM_IMAGES[index % TOURISM_IMAGES.length]}
+                  src={
+                    cachedImages[index] ||
+                    TOURISM_IMAGES[index % TOURISM_IMAGES.length]
+                  }
                   alt="Travel"
                   className="w-full h-48 object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = TOURISM_IMAGES[index % TOURISM_IMAGES.length];
+                    e.target.src =
+                      TOURISM_IMAGES[index % TOURISM_IMAGES.length];
                   }}
                 />
                 <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 flex items-center">
-                <FaMapMarkerAlt className="mr-2 text-[#8DD3BB]" />
-                 {getPlanTitle(index)}
-               </h3>
-                  
+                  <h3 className="text-xl font-bold mb-2 flex items-center">
+                    <FaMapMarkerAlt className="mr-2 text-[#8DD3BB]" />
+                    {getPlanTitle(index)}
+                  </h3>
+
                   <p className="text-gray-600 mb-4">
                     <FaWallet className="inline mr-2" />
                     Total Cost: {formatCurrency(plan.total_cost)}
@@ -102,7 +106,9 @@ const Plans = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate("/dashboard1/plan")}
+                    onClick={() =>
+                      navigate(`/dashboard/plan?planIndex=${index}`)
+                    }
                     className="w-full py-2 rounded-lg transition duration-300 bg-[#8DD3BB] hover:bg-[#7bc4a9]"
                   >
                     Details

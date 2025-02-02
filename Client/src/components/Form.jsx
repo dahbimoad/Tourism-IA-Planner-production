@@ -83,7 +83,7 @@ const TravelPlanForm = () => {
       setDepartureDate('');
       setReturnDate('');
       setBudget('');
-      navigate('/dashboard1/plans');
+      navigate('/dashboard/plans');
     } catch (error) {
       console.error('Erreur lors de la création :', error);
       alert(error.message || 'Une erreur est survenue lors de la création de la préférence.');
