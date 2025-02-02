@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
@@ -6,12 +6,34 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const PreferencesContext = createContext();
 
+const STORAGE_KEYS = {
+  PREFERENCES: 'userPreferences',
+  GENERATED_PLANS: 'generatedPlans'
+};
+
 export const PreferencesProvider = ({ children }) => {
   const { token } = useContext(AuthContext);
-  const [preferences, setPreferences] = useState([]);
-  const [generatedPlans, setGeneratedPlans] = useState([]);
+  
+  const [preferences, setPreferences] = useState(() => {
+    const savedPreferences = localStorage.getItem(STORAGE_KEYS.PREFERENCES);
+    return savedPreferences ? JSON.parse(savedPreferences) : [];
+  });
+
+  const [generatedPlans, setGeneratedPlans] = useState(() => {
+    const savedPlans = localStorage.getItem(STORAGE_KEYS.GENERATED_PLANS);
+    return savedPlans ? JSON.parse(savedPlans) : [];
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(preferences));
+  }, [preferences]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.GENERATED_PLANS, JSON.stringify(generatedPlans));
+  }, [generatedPlans]);
 
   const handleCreatePreference = async (preferenceData) => {
     setIsLoading(true);
@@ -35,7 +57,13 @@ export const PreferencesProvider = ({ children }) => {
       );
 
       const data = response.data;
-      setPreferences(prev => [...prev, data.preference]);
+      
+      // Vider le localStorage avant de mettre à jour avec les nouvelles données
+      localStorage.removeItem(STORAGE_KEYS.PREFERENCES);
+      localStorage.removeItem(STORAGE_KEYS.GENERATED_PLANS);
+      
+      // Mettre à jour les états avec uniquement les nouvelles données
+      setPreferences([data.preference]);
       setGeneratedPlans(data.generated_plans);
       
       return data;
@@ -43,14 +71,11 @@ export const PreferencesProvider = ({ children }) => {
       let errorMessage = 'Une erreur est survenue';
       
       if (error.response) {
-        // Erreur de réponse du serveur
         const errorData = error.response.data;
         errorMessage = errorData.message || `Erreur ${error.response.status}`;
       } else if (error.request) {
-        // Requête effectuée mais pas de réponse
         errorMessage = 'Pas de réponse du serveur';
       } else {
-        // Erreur de configuration de la requête
         errorMessage = error.message;
       }
 
@@ -62,6 +87,13 @@ export const PreferencesProvider = ({ children }) => {
     }
   };
 
+  const clearStoredData = () => {
+    localStorage.removeItem(STORAGE_KEYS.PREFERENCES);
+    localStorage.removeItem(STORAGE_KEYS.GENERATED_PLANS);
+    setPreferences([]);
+    setGeneratedPlans([]);
+  };
+
   return (
     <PreferencesContext.Provider 
       value={{ 
@@ -69,7 +101,8 @@ export const PreferencesProvider = ({ children }) => {
         preferences,
         generatedPlans,
         isLoading,
-        error
+        error,
+        clearStoredData
       }}
     >
       {children}
