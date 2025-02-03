@@ -16,6 +16,8 @@ from app.controllers.VilleController import router as villes_router
 from app.db.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+from app.controllers.user_controller import router as user_profile_router
+
 logging.basicConfig()
 logging.getLogger('sqlalchemy').setLevel(logging.INFO)
 
@@ -88,3 +90,4 @@ app.include_router(preferences_router)
 app.include_router(villes_router)
 app.include_router(chatbot_router, prefix="/api/chat", tags=["chat"])
 
+app.include_router(user_profile_router, prefix="/user", tags=["user"])

@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaMapMarkerAlt, FaEnvelope, FaPhone, FaArrowUp, FaHome, FaInfoCircle, FaRoute, FaBlog, FaAddressBook, FaAccessibleIcon } from "react-icons/fa";
+import ChatInterface from "./ChatInterface";
+import { 
+  FaFacebookF, 
+  FaInstagram, 
+  FaTwitter, 
+  FaLinkedinIn, 
+  FaMapMarkerAlt, 
+  FaEnvelope, 
+  FaPhone, 
+  FaArrowUp, 
+  FaHome, 
+  FaInfoCircle, 
+  FaRoute, 
+  FaBlog, 
+  FaAddressBook, 
+  FaCommentDots 
+} from "react-icons/fa";
 
 const Footer = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [moroccoTime, setMoroccoTime] = useState("");
   const [fontSize, setFontSize] = useState("normal");
+  const [showChat, setShowChat] = useState(false);
 
   const quotes = [
     "Travel is the only thing you buy that makes you richer",
@@ -146,7 +163,6 @@ const Footer = () => {
           <a href="#" className="text-2xl hover:text-red-300 transition-transform hover:scale-110">
             <FaInstagram />
           </a>
-          
           <a href="#" className="text-2xl hover:text-blue-400 transition-transform hover:scale-110">
             <FaLinkedinIn />
           </a>
@@ -164,19 +180,36 @@ const Footer = () => {
         </div>
       </div>
 
+      {/* Chatbot Button */}
+      <button
+        onClick={() => setShowChat(!showChat)}
+        className="fixed bottom-8 left-8 bg-gray-800 p-4 rounded-full hover:bg-[#8DD3BB] transition-colors z-50 shadow-lg"
+        aria-label="Open chat"
+      >
+        <FaCommentDots className="text-xl text-white" />
+        {!showChat && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+            !
+          </span>
+        )}
+      </button>
+
+      {/* Chat Interface */}
+      {showChat && <ChatInterface onClose={() => setShowChat(false)} />}
+    {/* ... rest of the footer ... */}
       {/* Scroll to Top Button */}
       {showScrollButton && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-gray-800 p-3 rounded-full hover:bg-[#8DD3BB] transition-colors"
+          className="fixed bottom-8 right-8 bg-gray-800 p-3 rounded-full hover:bg-[#8DD3BB] transition-colors z-50"
           aria-label="Scroll to top"
         >
-          <FaArrowUp />
+          <FaArrowUp className="text-white" />
         </button>
       )}
 
-      {/* Accessibility Button */}
-      
+      {/* Add your Chat component here */}
+      {/* {showChat && <ChatComponent />} */}
     </footer>
   );
 };

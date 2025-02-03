@@ -5,50 +5,46 @@ import PrivateRoute from "./components/PrivateRoute";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { AuthProvider } from './contexts/AuthContext';
-import { PreferencesProvider  } from './contexts/PreferencesContext'; // Import du UsersProvider
+import { ProfileProvider } from './contexts/ProfileContext'; // Add ProfileProvider
+import { PreferencesProvider } from './contexts/PreferencesContext';
 import UserInterface from "./pages/UserInterface";
 import Form from "./components/Form";
 import Plans from "./components/Plans";
+import Profil from "./components/Profil";
 import Plan from "./components/Plan";
 import FavouritesPlans from "./components/FavouritesPlans";
 
 const App = () => {
   return (
     <AuthProvider>
-      <PreferencesProvider>{/* Enveloppement avec UsersProvider */}
-        <Router>
-          <Routes>
-            {/* Route principale */}
-            <Route path="/" element={<Home />} />
-            
-            {/* Routes d'authentification */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+      <ProfileProvider> {/* Add ProfileProvider here */}
+        <PreferencesProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
 
-            {/* Route protégée pour /dashboard1 */}
-            <Route
-              path="/dashboard1"
-              element={
-                <PrivateRoute>
-                  <UserInterface />
-                </PrivateRoute>
-              }
-            >
-              {/* Routes imbriquées sous /dashboard1 */}
-              <Route path="form" element={<Form />} />
-            <Route path="plans" element={<Plans />} />
-            <Route path="plan" element={<Plan />} />
-            <Route path="FavouritesPlans" element={<FavouritesPlans />} />
-            </Route>
-
-            {/* Vous pouvez ajouter d'autres routes ici */}
-          </Routes>
-        </Router>
+              <Route
+                path="/dashboard1"
+                element={
+                  <PrivateRoute>
+                    <UserInterface />
+                  </PrivateRoute>
+                }
+              >
+                <Route path="form" element={<Form />} />
+                <Route path="plans" element={<Plans />} />
+                <Route path="plan" element={<Plan />} />
+                <Route path="profil" element={<Profil />} />
+                <Route path="FavouritesPlans" element={<FavouritesPlans />} />
+              </Route>
+            </Routes>
+          </Router>
         </PreferencesProvider>
-   </AuthProvider>
+      </ProfileProvider> {/* Close ProfileProvider here */}
+    </AuthProvider>
   );
 };
 
 export default App;
-
-
