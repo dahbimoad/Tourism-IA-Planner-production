@@ -20,8 +20,8 @@ import Plan from "./components/Plan";
 import FavouritesPlans from "./components/FavouritesPlans";
 
 // Import des contextes pour la gestion d'état globale
-import { AuthProvider } from './contexts/AuthContext';
-import { PreferencesProvider  } from './contexts/PreferencesContext';
+
+
 
 const App = () => {
   return (
