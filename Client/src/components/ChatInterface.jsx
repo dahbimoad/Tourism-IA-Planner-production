@@ -4,8 +4,8 @@ import { ChatProvider, useChat } from '../contexts/ChatContext';
 
 const ChatInterface = ({ onClose }) => {
   const [message, setMessage] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
-  const { messages, sendMessage, loading, error, successMessage } = useChat();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const { messages, sendMessage, loading } = useChat();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
