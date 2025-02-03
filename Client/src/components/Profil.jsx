@@ -13,7 +13,8 @@ const Profil = () => {
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
-    newPassword: ""
+    newPassword: "",
+    confirmPassword: ""
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +104,10 @@ const Profil = () => {
       newErrors.currentPassword = "Current password is required";
     }
 
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
     const passwordError = validatePassword(passwordData.newPassword);
     if (passwordError) newErrors.newPassword = passwordError;
 
@@ -112,7 +117,15 @@ const Profil = () => {
     }
 
     setIsSaving(true);
-    await changePassword(passwordData);
+    const success = await changePassword(passwordData);
+    if (success) {
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+      setShowPasswordDialog(false);
+    }
     setIsSaving(false);
   };
 
@@ -138,7 +151,7 @@ const Profil = () => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
           >
-            <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 mt-20 ml-[480px]">
+            <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 mt-20 ml-[500px]">
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -311,7 +324,10 @@ const Profil = () => {
                         <input
                           type={showPassword ? "text" : "password"}
                           value={passwordData.currentPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                          onChange={(e) => setPasswordData({ 
+                            ...passwordData, 
+                            currentPassword: e.target.value 
+                          })}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
                         />
                         <button
@@ -334,7 +350,10 @@ const Profil = () => {
                         <input
                           type={showPassword ? "text" : "password"}
                           value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                          onChange={(e) => setPasswordData({ 
+                            ...passwordData, 
+                            newPassword: e.target.value 
+                          })}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
                         />
                         <button
@@ -346,6 +365,32 @@ const Profil = () => {
                       </div>
                       {errors.newPassword && (
                         <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Confirm New Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData({ 
+                            ...passwordData, 
+                            confirmPassword: e.target.value 
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
+                        />
+                        <button
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2 top-2"
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
                       )}
                     </div>
                   </div>

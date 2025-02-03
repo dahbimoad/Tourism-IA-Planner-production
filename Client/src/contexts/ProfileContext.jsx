@@ -56,27 +56,31 @@ export const ProfileProvider = ({ children }) => {
   const changePassword = async (passwordData) => {
     try {
       setLoading(true);
-      await axios.post(
-        'http://127.0.0.1:8000/user/change-password',
-        passwordData,
+      await axios.put(
+        'http://localhost:8000/user/password',
+        {
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+          confirm_password: passwordData.confirmPassword
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json'
+          }
         }
       );
       setError(null);
-      setSuccessMessage('Password changed successfully!');
+      setSuccessMessage('Password updated successfully!');
       setTimeout(() => setSuccessMessage(null), 3000);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to change password');
+      setError(err.response?.data?.message || 'Password update failed');
       return false;
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (token) {
       fetchProfile();
