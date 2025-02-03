@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ProfileContext = createContext();
 
 export const ProfileProvider = ({ children }) => {
@@ -13,7 +15,7 @@ export const ProfileProvider = ({ children }) => {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/user/me', {
+      const response = await axios.get(`${API_URL}/user/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +33,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.put(
-        'http://127.0.0.1:8000/user/profile',
+        `${API_URL}/user/profile`,
         profileData,
         {
           headers: {
@@ -57,7 +59,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       setLoading(true);
       await axios.put(
-        'http://localhost:8000/user/password',
+        `${API_URL}/user/password`,
         {
           current_password: passwordData.currentPassword,
           new_password: passwordData.newPassword,
