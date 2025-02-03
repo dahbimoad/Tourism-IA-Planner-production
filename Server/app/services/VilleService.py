@@ -6,6 +6,9 @@ from app.db.database import get_db
 
 
 
+
+
+
 def getVillesService(db : Session):
     return db.query(Villes).all()
 

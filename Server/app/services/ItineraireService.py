@@ -7,26 +7,18 @@ from app.db.models import Itineraires,VilleItineraire
 
 
 
-def createItineraireService(db : Session,userId:int,activiteId:int,hotelId:int,timeSpent:int,Budget:float):
-    
-    newItineraire = Itineraires(
-        id_activite = activiteId,
-        id_hotel = hotelId,
-        time_spent_by_ville = timeSpent,
-        budget = Budget
-
-    )
-    
+def createItineraireService(db : Session,newItineraire : Itineraires):
+     
     try:
         db.add(newItineraire)
-        db.flush()
-        db.refresh(newItineraire)
         db.commit()
+        db.refresh(newItineraire)
+        return True
         
     except Exception as e:
         db.rollback()  
     raise HTTPException(status_code=500, detail=f"Erreur lors de l'ajout de l'itinéraire: {str(e)}")
-    return newItineraire
+    
 
 
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, root_validator, Field
 from datetime import datetime
@@ -11,7 +11,11 @@ from app.services.preferencesService import (
     createPreferenceService, getPreferencesService, getPreferencesById,
     deletePreferenceById, updatePreferenceService,PreferenceToAi
 )
-from app.db.models import User
+from app.services.ItineraireService import createItineraireService
+from app.services.activiteService import addActivite
+from app.services.hotelService import createHotelService
+from app.services.VilleItineraireService import createVilleItineraireService
+from app.db.models import User,Villes,Activities,Hotels,Itineraires,VilleItineraire
 from app.Ai.AI import generate_plans ,PlanRequest
  
 
@@ -220,8 +224,64 @@ def updatePreference(id: int,preference: PreferencesUpdate,db: Session = Depends
 
 
 @router.post("/preferencesFavori/")
-def addTofavori(
-    preference : PreferencesCreate,
-    db : Session = Depends(get_db),
+async def addTofavori(
+    request: Request,  
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    
+    plan_data = await request.json()
+
+    villeItin = VilleItineraire()
+
+    for ville in plan_data["plan"]:
+        city_name = ville["city"]
+        activities = ville["activities"]
+        ville_obj = db.query(Villes).filter(Villes.nom == city_name).first()
+        if not ville_obj:
+            print(f"Ville {city_name} introuvable.")
+            continue
+
+
+       
+
+
+        for activity in activities:
+            activity_obj = Activities(
+                nom=activity["name"],
+                description=f"Activité {activity['name']} à {city_name}",
+                cout=activity["price"],  
+                adresse=f"{city_name} centre ville",
+                idVille=ville_obj.id
+            )
+            addActivite(db,activity_obj)
+
+        hotel = ville["hotel"]
+        
+        
+        newhotel = Hotels(
+            nom = hotel["name"],
+            adresse = "test",
+            description = "test",
+            cout = hotel["pricePerNight"],
+            idVille = ville_obj.id
+        )   
+        createHotelService(db,newhotel) 
+
+        newItin = Itineraires(
+            id_activite = activity_obj.id,
+            id_hotel = newhotel.id,
+            time_spent_by_ville = ville["days_spent"],
+            budget = ville["hotel"]["totalPrice"] + ville["total_activities_cost"]
+
+        )
+        createItineraireService(db,newItin)
+        villeItin.idItineraire = newItin.id
+        villeItin.idVille = ville_obj.id
+        createVilleItineraireService(db,villeItin)
+
+
+    if not plan_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée reçue")
+
+    return {"message": "Données reçues", "data": plan_data}

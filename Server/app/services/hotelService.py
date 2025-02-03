@@ -8,14 +8,8 @@ from app.db.models import Hotels
 
 
 
-def createHotelService(db: Session, nom: str, adresse: str, description: str, cout: float, idVille: int):
-    newHotel = Hotels(
-        nom=nom,
-        adresse=adresse,
-        description=description,
-        cout=cout,
-        idVille=idVille
-    )
+def createHotelService(db: Session, newHotel : Hotels):
+   
 
     try:
         db.add(newHotel)
