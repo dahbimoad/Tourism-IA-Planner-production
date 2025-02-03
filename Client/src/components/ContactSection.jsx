@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaRoute, FaRegMoneyBillAlt, FaRegLightbulb, FaRegSmile, FaHeadset, FaHistory, FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaInstagram, FaMapMarkerAlt, FaRobot } from "react-icons/fa";
+import { FaRoute, FaRegMoneyBillAlt, FaRegLightbulb, FaRegSmile, FaHeadset, FaHistory, FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaInstagram, FaMapMarkerAlt, FaRobot, FaComment } from "react-icons/fa";
+import ChatInterface from './ChatInterface';
 
 const AboutSection = () => {
   const [formData, setFormData] = useState({
@@ -8,9 +9,6 @@ const AboutSection = () => {
     subject: "",
     message: ""
   });
-
-
- 
 
   const handleInputChange = (e) => {
     setFormData({
@@ -24,14 +22,46 @@ const AboutSection = () => {
     console.log("Form submitted:", formData);
   };
 
+  const ChatWrapper = () => {
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const handleOpenChat = () => {
+      setIsChatOpen(true);
+    };
+
+    const handleCloseChat = () => {
+      setIsChatOpen(false);
+    };
+
+    return (
+      <div className="relative">
+        {!isChatOpen && (
+          <button
+            onClick={handleOpenChat}
+            className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+          >
+            <FaComment className="text-gray-600" />
+            Chat with Our AI Assistant
+          </button>
+        )}
+
+        {isChatOpen && <ChatInterface onClose={handleCloseChat} />}
+      </div>
+    );
+  };
+
   return (
     <div id="contact" className="w-full bg-white">
-      <div className=" py-20">
+      <div className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">GET IN <span className="text-[#8DD3BB]">TOUCH</span></h2>
-            <p className="text-xl text-center text-black mb-12">We're here to help you plan the perfect Moroccan adventure</p>
-            
+            <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">
+              GET IN <span className="text-[#8DD3BB]">TOUCH</span>
+            </h2>
+            <p className="text-xl text-center text-black mb-12">
+              We're here to help you plan the perfect Moroccan adventure
+            </p>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="bg-white p-8 rounded-lg shadow-xl">
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -108,7 +138,6 @@ const AboutSection = () => {
                       <a href="#" className="text-2xl text-[#8DD3BB] hover:text-blue-600 transition-colors">
                         <FaFacebook />
                       </a>
-                      
                       <a href="#" className="text-2xl text-[#8DD3BB] hover:text-red-300 transition-colors">
                         <FaInstagram />
                       </a>
@@ -121,17 +150,13 @@ const AboutSection = () => {
                     <h4 className="font-semibold text-gray-800">Need Immediate Help?</h4>
                     <FaRobot className="text-2xl text-[#8DD3BB]" />
                   </div>
-                  <button className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors">
-                    Chat with Our AI Assistant
-                  </button>
+                  <ChatWrapper />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 };
