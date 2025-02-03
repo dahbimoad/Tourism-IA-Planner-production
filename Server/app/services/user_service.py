@@ -133,6 +133,42 @@ def update_user_profile(db: Session, user_id: int, user_data: UserUpdate):
                 "error": str(e)
             }
         )
+
+
+async def update_user_image(db: Session, user_id: int, image_data: bytes, image_type: str):
+    """Update user's profile picture"""
+    try:
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "message": "User not found",
+                    "code": "USER_NOT_FOUND"
+                }
+            )
+
+        # Update image and image type
+        db_user.image = image_data
+        db_user.image_type = image_type
+
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "message": "An unexpected error occurred",
+                "code": "INTERNAL_SERVER_ERROR",
+                "error": str(e)
+            }
+        )
+
 def update_user_password(db: Session, user_id: int, password_data: PasswordUpdate):
     """Update user password with validation"""
     try:
