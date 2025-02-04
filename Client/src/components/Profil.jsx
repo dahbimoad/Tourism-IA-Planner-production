@@ -4,12 +4,12 @@ import { FaEye, FaEyeSlash, FaCamera } from "react-icons/fa";
 import { useProfile } from "../contexts/ProfileContext";
 
 const Profil = () => {
-  const { profile, loading, error, successMessage, updateProfile, changePassword } = useProfile();
+  const { profile, loading, error, successMessage, updateProfile, changePassword, updateProfileImage, getProfileImage } = useProfile();
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
     email: "",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3",
+    avatar: "",
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -23,15 +23,24 @@ const Profil = () => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        nom: profile.nom || "",
-        prenom: profile.prenom || "",
-        email: profile.email || "",
-        avatar: profile.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3",
-      });
-    }
-  }, [profile]);
+    const loadProfileImage = async () => {
+      if (profile) {
+        setFormData({
+          nom: profile.nom || "",
+          prenom: profile.prenom || "",
+          email: profile.email || "",
+          avatar: profile.avatar || ""
+        });
+        
+        // Load profile image
+        const imageUrl = await getProfileImage();
+        if (imageUrl) {
+          setImagePreview(imageUrl);
+        }
+      }
+    };
+    loadProfileImage();
+  }, [profile, getProfileImage]);
 
   const validateNom = (nom) => {
     if (nom.length < 2) return "First name must be at least 2 characters";
@@ -60,18 +69,27 @@ const Profil = () => {
     return "";
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, avatar: "File size must be less than 5MB" });
-        return;
+      try {
+        if (file.size > 5 * 1024 * 1024) {
+          setErrors({ ...errors, avatar: "File size must be less than 5MB" });
+          return;
+        }
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload image
+        await updateProfileImage(file);
+      } catch (error) {
+        console.error('Error uploading image:', error);
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
