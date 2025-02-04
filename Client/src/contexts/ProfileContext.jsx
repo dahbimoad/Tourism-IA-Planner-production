@@ -1,3 +1,4 @@
+// ProfileContext.jsx
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
@@ -29,6 +30,52 @@ export const ProfileProvider = ({ children }) => {
     }
   }, [token]);
 
+  const getProfileImage = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/user/profile/image`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'blob'
+      });
+      return URL.createObjectURL(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch profile image');
+      return null;
+    }
+  }, [token]);
+
+  const updateProfileImage = async (imageFile) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      const response = await axios.put(
+        `${API_URL}/user/profile/image`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Refresh profile data after image update
+      await fetchProfile();
+      setError(null);
+      setSuccessMessage('Profile image updated successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      return response.data;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update profile image');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateProfile = async (profileData) => {
     try {
       setLoading(true);
@@ -59,7 +106,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       setLoading(true);
       await axios.put(
-        `${API_URL}/user/password` ,
+        `${API_URL}/user/password`,
         {
           current_password: passwordData.currentPassword,
           new_password: passwordData.newPassword,
@@ -83,6 +130,7 @@ export const ProfileProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (token) {
       fetchProfile();
@@ -99,6 +147,8 @@ export const ProfileProvider = ({ children }) => {
         fetchProfile,
         updateProfile,
         changePassword,
+        getProfileImage,
+        updateProfileImage
       }}
     >
       {children}
