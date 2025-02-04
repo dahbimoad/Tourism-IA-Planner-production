@@ -59,7 +59,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       setLoading(true);
       await axios.put(
-        `${API_URL}/user/password`,
+        `${API_URL}/user/password` ,
         {
           current_password: passwordData.currentPassword,
           new_password: passwordData.newPassword,
