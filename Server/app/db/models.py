@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float,UniqueConstraint
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, UniqueConstraint, LargeBinary
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 from sqlalchemy import PrimaryKeyConstraint
@@ -40,6 +40,8 @@ class User(Base):
     prenom = Column(String)
     email = Column(String)
     password = Column(String)
+    image = Column(LargeBinary, nullable=True)
+    image_type = Column(String, nullable=True)
     preferences = relationship("Preferences", back_populates="user")
 
 

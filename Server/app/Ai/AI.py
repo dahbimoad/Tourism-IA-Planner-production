@@ -11,7 +11,6 @@ import os
 
 # Get the current directory where AI.py is located
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
 # Define the paths relative to the current directory
 tourism_data_file = os.path.join(current_dir, "Comprehensive_Max_Tourism_Dataset.xlsx")
 transport_data_file = os.path.join(current_dir, "Comprehensive_Max_Transport_Dataset.xlsx")
