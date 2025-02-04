@@ -8,35 +8,53 @@ from app.services.VilleService import getVilleIdByName
 
 
 
-def createPreferenceService(db : Session, lieuDepart: str, cities : list[str],dateDepart: str, dateRetour: str,budget: float, idPlan: int, userId:int):
-    
-    
-    newPref = Preferences(
-        lieuDepart = lieuDepart,
-        dateDepart = dateDepart,
-        dateRetour = dateRetour,
-        budget = budget,
-        idPlan = idPlan,
-        userId = userId
-    )
-    db.add(newPref)
-    db.flush()
-    db.refresh(newPref)
-    db.commit()
-    
-    
-    for city in cities:
-        cityId = getVilleIdByName(db,city)
-        newLieu = LieuxToVisit(
-            idPreference = newPref.id,
-            idVille = cityId
+def createPreferenceService(db: Session, lieuDepart: str, cities: list[str], dateDepart: str, dateRetour: str, budget: float, idPlan: int, userId: int):
+    try:
+        
+        newPref = Preferences(
+            lieuDepart=lieuDepart,
+            dateDepart=dateDepart,
+            dateRetour=dateRetour,
+            budget=budget,
+            idPlan=idPlan,
+            userId=userId
         )
-        db.add(newLieu)
-        db.commit()
+
+        db.add(newPref)
+        db.flush()  
+        db.refresh(newPref)  
+        db.commit()  
+
        
+        for city in cities:
+            cityId = getVilleIdByName(db, city)
+            if not cityId:
+                raise HTTPException(status_code=400, detail=f"La ville '{city}' n'existe pas ou est invalide.")
 
+            newLieu = LieuxToVisit(
+                idPreference=newPref.id,
+                idVille=cityId
+            )
+            db.add(newLieu)
+            db.commit()  
 
-    return newPref
+        return newPref
+
+    except IntegrityError as e:
+        
+        db.rollback()  
+        raise HTTPException(status_code=400, detail="Erreur d'intégrité des données : " + str(e.orig))
+
+    except SQLAlchemyError as e:
+        
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Erreur avec la base de données : " + str(e))
+
+    except Exception as e:
+       
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur : " + str(e))
+
 
 
 def getPreferencesService(db : Session):

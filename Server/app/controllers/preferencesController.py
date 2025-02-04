@@ -224,76 +224,6 @@ def updatePreference(id: int,preference: PreferencesUpdate,db: Session = Depends
     }
 
 
-@router.post("/preferencesFavori/")
-async def addTofavori(
-    request: Request,  
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    
-    plan_data = await request.json()
-
-    villeItin = VilleItineraire()
-    idplan = plan_data.get("idPlan") 
-    for ville in plan_data["plan"]:
-        city_name = ville["city"]
-        activities = ville["activities"]
-        ville_obj = db.query(Villes).filter(Villes.nom == city_name).first()
-        if not ville_obj:
-            print(f"Ville {city_name} introuvable.")
-            continue
-
-
-       
-
-
-        for activity in activities:
-            activity_obj = Activities(
-                nom=activity["name"],
-                description=f"Activité {activity['name']} à {city_name}",
-                cout=activity["price"],  
-                adresse=f"{city_name} centre ville",
-                idVille=ville_obj.id
-            )
-            addActivite(db,activity_obj)
-
-        hotel = ville["hotel"]
-        
-        
-        newhotel = Hotels(
-            nom = hotel["name"],
-            adresse = "test",
-            description = "test",
-            cout = hotel["pricePerNight"],
-            idVille = ville_obj.id
-        )   
-        createHotelService(db,newhotel) 
-
-        newItin = Itineraires(
-            id_activite = activity_obj.id,
-            id_hotel = newhotel.id,
-            time_spent_by_ville = ville["days_spent"],
-            budget = ville["hotel"]["totalPrice"] + ville["total_activities_cost"]
-        
-        )
-
-        villeItin = VilleItineraire()
-        createItineraireService(db,newItin)
-        villeItin.idItineraire = newItin.id
-        villeItin.idVille = ville_obj.id
-        createVilleItineraireService(db,villeItin)
-
-        newUserPlan = UserPlan(
-            idPlan = idplan,
-            idVilleItineraire= villeItin.id
-        )
-        createUserPlanService(db,newUserPlan)
-
-
-    if not plan_data:
-        raise HTTPException(status_code=400, detail="Aucune donnée reçue")
-
-    return {"message": "Données reçues", "data": plan_data}
 
 @router.post("/preferencesFavorites/")
 async def addTofavori(
@@ -343,3 +273,26 @@ async def get_favorites(
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération des favoris: {str(e)}")
 
 
+@router.delete("/preferencesFavorites/{favorite_id}/")
+async def delete_favorite(
+    favorite_id: int,  
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        
+        favorite = db.query(Favorite).join(Plans).filter(Favorite.id == favorite_id, Plans.idUser == current_user.id).first()
+
+       
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favori non trouvé")
+
+       
+        db.delete(favorite)
+        db.commit()
+
+        return {"message": "Favori supprimé avec succès"}
+
+    except Exception as e:
+        db.rollback()  
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la suppression du favori: {str(e)}")
