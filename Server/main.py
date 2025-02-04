@@ -7,6 +7,8 @@ from app.db.models import Villes
 from app.Ai.router import plans_router
 from app.controllers.trip_controller import router as trip_router
 from app.services.trip_planner import TripPlannerService
+from app.controllers.google_auth_controller import router as google_auth_router
+from app.controllers.logout_controller import router as logout_router
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -91,3 +93,4 @@ app.include_router(villes_router)
 app.include_router(chatbot_router, prefix="/api/chat", tags=["chat"])
 
 app.include_router(user_profile_router, prefix="/user", tags=["user"])
+app.include_router(google_auth_router, tags=["Authentication"])
