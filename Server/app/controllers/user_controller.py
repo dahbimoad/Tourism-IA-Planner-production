@@ -1,27 +1,24 @@
-# app/controllers/user_controller.py
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, status, File, UploadFile
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.schemas.user import PasswordUpdate
-from app.schemas.user import UserUpdate, UserOut
+from app.schemas.user import PasswordUpdate, UserUpdate, UserOut
 from app.services.user_service import update_user_profile, update_user_image, update_user_password
 from app.controllers.auth_controller import get_current_user
 from app.db.models import User
+from app.core.error_handler import error_handler
 from typing import Dict, Any
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 
-
 @router.put("/profile", response_model=UserOut)
 async def update_profile(
-        user_data: UserUpdate,
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    user_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
-    """
-    Update the current user's profile information
-    """
+    """Update the current user's profile information"""
     try:
         updated_user = update_user_profile(db, current_user.id, user_data)
         return {
@@ -30,50 +27,39 @@ async def update_profile(
             "prenom": updated_user.prenom,
             "email": updated_user.email
         }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "message": "An unexpected error occurred",
-                "code": "INTERNAL_SERVER_ERROR",
-                "error": str(e)
-            }
+    except IntegrityError as e:
+        error_handler.raise_validation_error(
+            detail="Database integrity error",
+            code="DB_INTEGRITY_ERROR",
+            field="database"
         )
-
+    except Exception as e:
+        error_handler.raise_server_error(error=e)
 
 @router.put("/profile/image")
 async def update_profile_image(
-        image: UploadFile = File(...),
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    image: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    """
-    Update the current user's profile picture
-    """
+    """Update the current user's profile picture"""
     try:
+        # Validate file type
         content_type = image.content_type
         if content_type not in ["image/jpeg", "image/png", "image/gif"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "message": "File type not allowed. Please upload JPEG, PNG or GIF",
-                    "code": "INVALID_FILE_TYPE",
-                    "field": "image"
-                }
+            error_handler.raise_validation_error(
+                detail="File type not allowed. Please upload JPEG, PNG or GIF",
+                code="INVALID_FILE_TYPE",
+                field="image"
             )
 
-        # Read image content
+        # Read and validate image size
         image_data = await image.read()
         if len(image_data) > 5 * 1024 * 1024:  # 5MB limit
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "message": "File size too large. Maximum size is 5MB",
-                    "code": "FILE_TOO_LARGE",
-                    "field": "image"
-                }
+            error_handler.raise_validation_error(
+                detail="File size too large. Maximum size is 5MB",
+                code="FILE_TOO_LARGE",
+                field="image"
             )
 
         # Update image in database
@@ -84,61 +70,50 @@ async def update_profile_image(
             "code": "IMAGE_UPDATED"
         }
 
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "message": "An unexpected error occurred",
-                "code": "INTERNAL_SERVER_ERROR",
-                "error": str(e)
-            }
-        )
-
+        error_handler.raise_server_error(error=e)
 
 @router.get("/profile/image")
 async def get_profile_image(
-        current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Retrieve the current user's profile picture
-    """
-    if not current_user.image:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "message": "No profile picture found",
-                "code": "NO_PROFILE_IMAGE"
-            }
+    """Retrieve the current user's profile picture"""
+    try:
+        if not current_user.image:
+            error_handler.raise_not_found_error(
+                detail="No profile picture found",
+                code="NO_PROFILE_IMAGE"
+            )
+
+        return Response(
+            content=current_user.image,
+            media_type=current_user.image_type
         )
-
-    return Response(
-        content=current_user.image,
-        media_type=current_user.image_type
-    )
-
+    except Exception as e:
+        error_handler.raise_server_error(error=e)
 
 @router.put("/password")
 async def update_password(
-        password_data: PasswordUpdate,
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    password_data: PasswordUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    """
-    Update the current user's password.
-    """
+    """Update the current user's password"""
     try:
         result = update_user_password(db, current_user.id, password_data)
         return result
-    except HTTPException as e:
-        raise e
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "message": "An unexpected error occurred",
-                "code": "INTERNAL_SERVER_ERROR",
-                "error": str(e)
-            }
-        )
+        error_handler.raise_server_error(error=e)
+
+@router.get("/profile", response_model=UserOut)
+async def get_profile(current_user: User = Depends(get_current_user)):
+    """Get the current user's profile information"""
+    try:
+        return {
+            "id": current_user.id,
+            "nom": current_user.nom,
+            "prenom": current_user.prenom,
+            "email": current_user.email
+        }
+    except Exception as e:
+        error_handler.raise_server_error(error=e)
