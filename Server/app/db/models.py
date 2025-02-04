@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, UniqueConstraint, PrimaryKeyConstraint,JSON
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -12,7 +12,7 @@ class Plans(Base):
     userPlans = relationship("UserPlan", back_populates="plan")
     idUser = Column(Integer, ForeignKey("users.id"), nullable=False)  
     user = relationship("User", back_populates="plans")  
-    
+    favorites = relationship("Favorite", back_populates="plan")
 
 
 class Preferences(Base):
@@ -135,3 +135,11 @@ class LieuxToVisit(Base):
 
     preference = relationship("Preferences", back_populates="villes")
     ville = relationship("Villes", back_populates="lieuxToVisit")
+
+
+class Favorite(Base):
+    __tablename__ = "favorites"
+    id = Column(Integer, primary_key=True, index=True)
+    plan_id = Column(Integer, ForeignKey("plans.id"), nullable=False)  
+    favorite_data = Column(JSON)  
+    plan = relationship("Plans", back_populates="favorites")

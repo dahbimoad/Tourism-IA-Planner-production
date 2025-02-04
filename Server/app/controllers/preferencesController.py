@@ -12,10 +12,11 @@ from app.services.preferencesService import (
     deletePreferenceById, updatePreferenceService,PreferenceToAi
 )
 from app.services.ItineraireService import createItineraireService
+from app.services.UserPlanService import createUserPlanService
 from app.services.activiteService import addActivite
 from app.services.hotelService import createHotelService
 from app.services.VilleItineraireService import createVilleItineraireService
-from app.db.models import User,Villes,Activities,Hotels,Itineraires,VilleItineraire
+from app.db.models import User,Villes,Activities,Hotels,Itineraires,VilleItineraire,UserPlan,Favorite,Plans
 from app.Ai.AI import generate_plans ,PlanRequest
  
 
@@ -233,7 +234,7 @@ async def addTofavori(
     plan_data = await request.json()
 
     villeItin = VilleItineraire()
-
+    idplan = plan_data.get("idPlan") 
     for ville in plan_data["plan"]:
         city_name = ville["city"]
         activities = ville["activities"]
@@ -273,15 +274,72 @@ async def addTofavori(
             id_hotel = newhotel.id,
             time_spent_by_ville = ville["days_spent"],
             budget = ville["hotel"]["totalPrice"] + ville["total_activities_cost"]
-
+        
         )
+
+        villeItin = VilleItineraire()
         createItineraireService(db,newItin)
         villeItin.idItineraire = newItin.id
         villeItin.idVille = ville_obj.id
         createVilleItineraireService(db,villeItin)
+
+        newUserPlan = UserPlan(
+            idPlan = idplan,
+            idVilleItineraire= villeItin.id
+        )
+        createUserPlanService(db,newUserPlan)
 
 
     if not plan_data:
         raise HTTPException(status_code=400, detail="Aucune donnée reçue")
 
     return {"message": "Données reçues", "data": plan_data}
+
+@router.post("/preferencesFavorites/")
+async def addTofavori(
+    request: Request,  
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+    plan_data = await request.json()
+    if not plan_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée reçue")
+
+    
+    newfav = Favorite(
+        plan_id=plan_data.get("idPlan"),  
+        favorite_data=plan_data  
+    )
+
+    try:
+        db.add(newfav)
+        db.commit()
+        db.refresh(newfav)
+        return {"message": "Favorite ajouté avec succès", "data": plan_data}
+    except Exception as e:
+        db.rollback()  
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'ajout en Favorites: {str(e)}")
+
+
+@router.get("/preferencesFavorites/")
+async def get_favorites(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        
+        favorites = db.query(Favorite).join(Plans).filter(Plans.idUser == current_user.id).all()
+
+        
+        if not favorites:
+            raise HTTPException(status_code=404, detail="Aucun favori trouvé")
+
+        favorites_data = [{"plan_id": fav.plan_id, "favorite_data": fav.favorite_data} for fav in favorites]
+
+        return {"message": "Favoris récupérés avec succès", "data": favorites_data}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération des favoris: {str(e)}")
+
+

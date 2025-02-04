@@ -2,11 +2,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.db.models import UserPlan
 
-def createUserPlanService(db: Session, idPlan: int, idVilleItineraire: int):
-    newUserPlan = UserPlan(
-        idPlan=idPlan,
-        idVilleItineraire=idVilleItineraire
-    )
+def createUserPlanService(db: Session, newUserPlan : UserPlan):
+
 
     try:
         db.add(newUserPlan)
