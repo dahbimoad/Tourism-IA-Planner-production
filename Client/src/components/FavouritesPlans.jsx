@@ -145,7 +145,7 @@ const FavouritesPlans = () => {
                     </p>
                   </div>
 
-                  <motion.button onClick={() => navigate("/dashboard1/plan")}
+                  <motion.button onClick={() => navigate("/dashboard/plan")}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full bg-[#8DD3BB] text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-300 flex items-center justify-center space-x-2"
