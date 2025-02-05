@@ -40,22 +40,24 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     # Log the error
     logger.error(f"Validation Error: {str(exc)}")
 
-    # Extract error details
-    errors = []
-    for error in exc.errors():
-        errors.append({
-            "loc": " -> ".join(str(x) for x in error["loc"]),
-            "msg": error["msg"],
-            "type": error["type"]
-        })
+    # Get the first error
+    error = exc.errors()[0]
+
+    # Extract field name from the location
+    field = error["loc"][-1] if error["loc"] else "unknown"
+
+    # Clean up the error message
+    message = error["msg"]
+    if message.startswith("Value error, "):
+        message = message.replace("Value error, ", "")
 
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "detail": {
-                "message": "Validation error",
-                "code": "VALIDATION_ERROR",
-                "errors": errors
+                "message": message,
+                "code": f"INVALID_{field.upper()}",
+                "field": field
             }
         }
     )

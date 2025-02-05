@@ -1,6 +1,7 @@
 # app/controllers/auth_controller.py
+from http.client import HTTPException
 
-from fastapi import Depends, Request
+from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.models import User
 from app.schemas.user import UserCreate, UserLogin
@@ -17,6 +18,14 @@ security = HTTPBearer()
 
 def signup(user: UserCreate, db: Session):
     try:
+        # Basic validation before database operations
+        if not isinstance(user.email, str) or '@' not in user.email:
+            error_handler.raise_validation_error(
+                detail="Invalid email format",
+                code="INVALID_EMAIL",
+                field="email"
+            )
+
         # Check if user exists
         existing_user = db.query(User).filter(User.email == user.email).first()
         if existing_user:
@@ -26,16 +35,33 @@ def signup(user: UserCreate, db: Session):
                 field="email"
             )
 
-        # Validate password and names
+        # Validate password
         try:
             UserCreate.validate_password(user.password)
+        except ValueError as e:
+            error_handler.raise_validation_error(
+                detail=str(e),
+                code="INVALID_PASSWORD",
+                field="password"
+            )
+
+        # Validate names
+        try:
             UserCreate.validate_name(user.nom, 'nom')
+        except ValueError as e:
+            error_handler.raise_validation_error(
+                detail=str(e),
+                code="INVALID_NAME",
+                field="nom"
+            )
+
+        try:
             UserCreate.validate_name(user.prenom, 'prenom')
         except ValueError as e:
             error_handler.raise_validation_error(
                 detail=str(e),
-                code="VALIDATION_ERROR",
-                field=str(e).split()[0].lower()
+                code="INVALID_NAME",
+                field="prenom"
             )
 
         # Hash password
@@ -55,6 +81,9 @@ def signup(user: UserCreate, db: Session):
 
         return {"message": "User created successfully"}
 
+    except HTTPException:
+        # Re-raise HTTP exceptions (including our validation errors)
+        raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error in signup: {str(e)}")
