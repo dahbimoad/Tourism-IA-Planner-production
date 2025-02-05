@@ -2,35 +2,10 @@
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi.exceptions import RequestValidationError, HTTPException
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """
-    Handle HTTP exceptions and return properly formatted JSON responses
-    """
-    # Log the error
-    logger.error(f"HTTP Exception: {exc.detail}")
-
-    # Get any additional headers
-    headers = getattr(exc, "headers", None)
-
-    # Format the error response
-    error_response = {
-        "detail": exc.detail if isinstance(exc.detail, dict) else {
-            "message": str(exc.detail),
-            "code": f"ERROR_{exc.status_code}"
-        }
-    }
-
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=error_response,
-        headers=headers
-    )
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -51,13 +26,40 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     if message.startswith("Value error, "):
         message = message.replace("Value error, ", "")
 
+    # Format the error detail in the desired structure
+    error_detail = {
+        'message': message,
+        'code': f"INVALID_{field.upper()}",
+        'field': field
+    }
+
+    # Return the response in the exact format requested
     return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "detail": {
-                "message": message,
-                "code": f"INVALID_{field.upper()}",
-                "field": field
+                "message": "Internal server error",
+                "code": "SERVER_ERROR",
+                "error": f"400: {error_detail}"
+            }
+        }
+    )
+
+
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """
+    Handle HTTP exceptions
+    """
+    # Log the error
+    logger.error(f"HTTP Exception: {exc.detail}")
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": {
+                "message": "Internal server error",
+                "code": "SERVER_ERROR",
+                "error": f"400: {exc.detail}"
             }
         }
     )
@@ -65,17 +67,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """
-    Handle any unhandled exceptions
+    Handle generic exceptions
     """
     # Log the error
-    logger.error(f"Unhandled Exception: {str(exc)}", exc_info=True)
+    logger.error(f"Generic Exception: {str(exc)}")
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "detail": {
                 "message": "Internal server error",
-                "code": "INTERNAL_SERVER_ERROR",
+                "code": "SERVER_ERROR",
                 "error": str(exc)
             }
         }
