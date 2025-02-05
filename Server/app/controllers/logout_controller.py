@@ -1,5 +1,4 @@
 # app/controllers/logout_controller.py
-
 from fastapi import APIRouter, Depends, Response, Request, BackgroundTasks
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -9,10 +8,8 @@ from app.db.models import User
 from app.core.token_management import token_manager
 from app.core.error_handler import error_handler
 from typing import Dict, Optional
-from datetime import datetime, timedelta
-import jwt
+from datetime import datetime,UTC
 import logging
-import asyncio
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -21,19 +18,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 security = HTTPBearer()
 
-
 async def cleanup_expired_tokens():
     """Background task to clean up expired tokens from the blacklist"""
     try:
-        while True:
-            current_time = datetime.utcnow()
-            # Clean up tokens every hour
-            await asyncio.sleep(3600)  # 1 hour
-            logger.info("Running token cleanup task")
-            token_manager.clear_invalid_tokens()
+        logger.info("Running token cleanup task")
+        token_manager.clear_invalid_tokens()
     except Exception as e:
         logger.error(f"Error in token cleanup task: {str(e)}")
-
 
 def log_logout_event(user_id: int, success: bool, error: Optional[str] = None):
     """Log logout events for audit purposes"""
@@ -50,33 +41,16 @@ def log_logout_event(user_id: int, success: bool, error: Optional[str] = None):
     except Exception as e:
         logger.error(f"Error logging logout event: {str(e)}")
 
-
 @router.post("/logout", response_model=Dict[str, str])
 async def logout(
-        request: Request,
-        response: Response,
-        background_tasks: BackgroundTasks,
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    request: Request,
+    response: Response,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    """
-    Handle user logout by invalidating their token and clearing cookies
-
-    Args:
-        request: FastAPI Request object
-        response: FastAPI Response object
-        background_tasks: FastAPI BackgroundTasks for async operations
-        current_user: Currently authenticated user
-        db: Database session
-
-    Returns:
-        Dict with success message
-
-    Raises:
-        HTTPException: For various error conditions
-    """
     try:
-        # Validate authorization header
+        # Extract token
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
             error_handler.raise_validation_error(
@@ -84,63 +58,47 @@ async def logout(
                 code="INVALID_AUTH_HEADER"
             )
 
-        # Extract and invalidate token
         token = auth_header.split(' ')[1]
-        token_manager.invalidate_token(token)
+
+        # Invalidate the token
+        token_manager.invalidate_token(token, current_user.id)
 
         # Clear cookies with secure flags
         response.delete_cookie(
             key="access_token",
             path="/",
-            secure=True,  # Only send over HTTPS
-            httponly=True,  # Prevent JavaScript access
-            samesite="strict"  # Strict CSRF protection
+            secure=True,
+            httponly=True,
+            samesite="strict"
         )
 
-        # Set comprehensive security headers
+        # Set security headers
         response.headers.update({
             "Clear-Site-Data": '"cookies", "storage", "cache", "executionContexts"',
             "Cache-Control": "no-cache, no-store, must-revalidate, private",
             "Pragma": "no-cache",
-            "Expires": "0",
-            "X-Content-Type-Options": "nosniff",
-            "X-Frame-Options": "DENY",
-            "X-XSS-Protection": "1; mode=block",
-            "Referrer-Policy": "strict-origin-when-cross-origin"
+            "Expires": "0"
         })
 
-        # Schedule background tasks
+        # Log event
         background_tasks.add_task(log_logout_event, current_user.id, True)
-        background_tasks.add_task(cleanup_expired_tokens)
 
-        logger.info(f"User {current_user.id} logged out successfully at {datetime.utcnow()}")
+        logger.info(f"User {current_user.id} logged out successfully")
 
         return {
             "message": "Successfully logged out",
             "status": "success",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-
-    except jwt.ExpiredSignatureError:
-        # Handle expired tokens gracefully
-        background_tasks.add_task(log_logout_event, current_user.id, True, "Token already expired")
-        return {
-            "message": "Successfully logged out",
-            "status": "success",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
 
     except Exception as e:
-        # Log the error
         logger.error(f"Logout error for user {current_user.id}: {str(e)}")
         background_tasks.add_task(log_logout_event, current_user.id, False, str(e))
-        error_handler.raise_server_error(
+        raise error_handler.raise_server_error(
             detail="Error during logout process",
             code="LOGOUT_ERROR",
             error=e
         )
-
-
 @router.post("/logout/all-devices", response_model=Dict[str, str])
 async def logout_all_devices(
         background_tasks: BackgroundTasks,

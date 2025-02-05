@@ -46,25 +46,35 @@ app.add_exception_handler(Exception, generic_exception_handler)
 
 @app.middleware("http")
 async def validate_token(request: Request, call_next):
-    """
-    Middleware to check if a token has been invalidated during logout
-    """
+    """Middleware to check if a token has been invalidated"""
     try:
+        # Skip token validation for non-protected routes
+        if request.url.path in [
+            "/user/signin",
+            "/user/signup",
+            "/auth/google",
+            "/docs",
+            "/openapi.json",
+            "/redoc"
+        ]:
+            return await call_next(request)
+
         auth_header = request.headers.get('Authorization')
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header.split(' ')[1]
+
+            # Check if token is invalidated
             if token_manager.is_token_invalid(token):
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={
                         "detail": {
-                            "message": "Token has been invalidated",
+                            "message": "Token has been invalidated. Please login again.",
                             "code": "INVALID_TOKEN"
                         }
                     }
                 )
 
-        # Continue with the request
         response = await call_next(request)
         return response
 

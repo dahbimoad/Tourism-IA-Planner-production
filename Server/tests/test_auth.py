@@ -187,26 +187,14 @@ class TestAuthentication:
         error_detail = response.json()["detail"]
         assert "Internal server error" in str(error_detail)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def test_logout_success(self, client, auth_header):
+    @pytest.mark.asyncio
+    async def test_logout_success(self, client, auth_header):
         """Test successful logout."""
         response = client.post("/user/logout", headers=auth_header)
         assert response.status_code == 200
-        assert "Successfully logged out" in str(response.json())
+        data = response.json()
+        assert "message" in data
+        assert "Successfully logged out" in data["message"]
 
     def test_logout_invalid_token(self, client):
         """Test logout with invalid token."""
