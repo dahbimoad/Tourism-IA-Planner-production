@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, root_validator, Field
 from datetime import datetime
@@ -9,23 +9,28 @@ from app.controllers.auth_controller import get_current_user
 from app.services.PlansService import createPlansService
 from app.services.preferencesService import (
     createPreferenceService, getPreferencesService, getPreferencesById,
-    deletePreferenceById, updatePreferenceService
+    deletePreferenceById, updatePreferenceService,PreferenceToAi
 )
-from app.db.models import User
+from app.services.ItineraireService import createItineraireService
+from app.services.UserPlanService import createUserPlanService
+from app.services.activiteService import addActivite
+from app.services.hotelService import createHotelService
+from app.services.VilleItineraireService import createVilleItineraireService
+from app.db.models import User,Villes,Activities,Hotels,Itineraires,VilleItineraire,UserPlan,Favorite,Plans
 from app.Ai.AI import generate_plans ,PlanRequest
-  # Import from the shared module
+ 
 
 router = APIRouter()
 
-# Define the PreferencesCreate model
+
 class PreferencesCreate(BaseModel):
     lieuDepart: str
     cities: List[str]
-    dateDepart: str  # Changed to string for consistency
-    dateRetour: str  # Changed to string for consistency
+    dateDepart: str  
+    dateRetour: str  
     budget: float
 
-    # Validation for dates
+    
     @root_validator(pre=True)
     def check_dates(cls, values):
         date_depart = values.get('dateDepart')
@@ -42,7 +47,7 @@ class PreferencesCreate(BaseModel):
 
         return values
 
-# Define the PreferencesUpdate model
+
 class PreferencesUpdate(BaseModel):
     lieuDepart: Optional[str] = None
     cities: Optional[List[str]] = None
@@ -69,7 +74,7 @@ class PreferencesUpdate(BaseModel):
 
         return values
 
-# Create a new preference and generate plans
+
 @router.post("/preferences/")
 def createPreference(
         preference: PreferencesCreate,
@@ -78,10 +83,10 @@ def createPreference(
 ):
     user_id = current_user.id
 
-    # Step 1: Create a new plan
-    newPlan = createPlansService(db=db)
+   
+    newPlan = createPlansService(db=db,idUser=user_id)
 
-    # Step 2: Create a new preference
+    
     newPref = createPreferenceService(
         db=db,
         lieuDepart=preference.lieuDepart,
@@ -90,12 +95,12 @@ def createPreference(
         dateRetour=preference.dateRetour,
         budget=preference.budget,
         idPlan=newPlan.id,
-        userId=user_id  # Use the user ID from current_user
+        userId=user_id  
     )
 
-    # Step 3: Generate plans using the AI function
+    
     try:
-        # Create a PlanRequest object for the AI function
+        
         plan_request = PlanRequest(
             lieuDepart=preference.lieuDepart,
             cities=preference.cities,
@@ -105,7 +110,7 @@ def createPreference(
             userId=user_id,
         )
 
-        generated_plans = generate_plans(plan_request) # Call the AI function to generate plans
+        generated_plans = generate_plans(plan_request) 
 
 
     except ValueError as e:
@@ -114,7 +119,7 @@ def createPreference(
         print(f"Error generating plans: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while generating plans: {str(e)}")
 
-    # Step 4: Return the preference and the generated plans
+    
     return {
         "message": "Preference created successfully",
         "preference": {
@@ -126,7 +131,7 @@ def createPreference(
         },
         "generated_plans": generated_plans
     }
-# Get all preferences
+
 @router.get("/preferences/")
 def getAll(db: Session = Depends(get_db)):
     preferences = getPreferencesService(db)
@@ -147,7 +152,7 @@ def getAll(db: Session = Depends(get_db)):
     }
 
 
-# Get a preference by ID
+
 @router.get("/preferences/{id}")
 def getById(id: int, db: Session = Depends(get_db)):
     preference = getPreferencesById(db, id)
@@ -167,7 +172,7 @@ def getById(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Preference not found")
 
 
-# Delete a preference by ID
+
 @router.delete("/preferences/{id}")
 def deletePreference(id: int, db: Session = Depends(get_db)):
     deleted_preference = deletePreferenceById(db, id)
@@ -189,13 +194,10 @@ def deletePreference(id: int, db: Session = Depends(get_db)):
     }
 
 
-# Update a preference by ID
+
 @router.put("/preferences/{id}")
-def updatePreference(
-        id: int,
-        preference: PreferencesUpdate,
-        db: Session = Depends(get_db)
-):
+def updatePreference(id: int,preference: PreferencesUpdate,db: Session = Depends(get_db)):
+    
     updatedPr = updatePreferenceService(
         db=db,
         preference_id=id,
@@ -220,3 +222,77 @@ def updatePreference(
             "userId": updatedPr.userId
         }
     }
+
+
+
+@router.post("/preferencesFavorites/")
+async def addTofavori(
+    request: Request,  
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+    plan_data = await request.json()
+    if not plan_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée reçue")
+
+    
+    newfav = Favorite(
+        plan_id=plan_data.get("idPlan"),  
+        favorite_data=plan_data  
+    )
+
+    try:
+        db.add(newfav)
+        db.commit()
+        db.refresh(newfav)
+        return {"message": "Favorite ajouté avec succès", "data": plan_data}
+    except Exception as e:
+        db.rollback()  
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'ajout en Favorites: {str(e)}")
+
+
+@router.get("/preferencesFavorites/")
+async def get_favorites(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        
+        favorites = db.query(Favorite).join(Plans).filter(Plans.idUser == current_user.id).all()
+
+        
+        if not favorites:
+            raise HTTPException(status_code=404, detail="Aucun favori trouvé")
+
+        favorites_data = [{"plan_id": fav.plan_id, "favorite_data": fav.favorite_data} for fav in favorites]
+
+        return {"message": "Favoris récupérés avec succès", "data": favorites_data}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération des favoris: {str(e)}")
+
+
+@router.delete("/preferencesFavorites/{favorite_id}/")
+async def delete_favorite(
+    favorite_id: int,  
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        
+        favorite = db.query(Favorite).join(Plans).filter(Favorite.id == favorite_id, Plans.idUser == current_user.id).first()
+
+       
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favori non trouvé")
+
+       
+        db.delete(favorite)
+        db.commit()
+
+        return {"message": "Favori supprimé avec succès"}
+
+    except Exception as e:
+        db.rollback()  
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la suppression du favori: {str(e)}")

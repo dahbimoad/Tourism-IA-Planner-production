@@ -1,0 +1,17 @@
+install ollama exe
+ollama run llama30
+
+
+
+
+
+
+
+
+pour front end :
+
+npm install framer-motion
+
+
+
+
