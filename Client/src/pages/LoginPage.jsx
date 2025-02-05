@@ -27,7 +27,7 @@ const LoginPage = () => {
       <div className="bg-[#ffffff] rounded-2xl flex max-w-3xl p-5 items-center">
         {/* Left Side */}
         <div className="md:w-1/2 px-8">
-          <h2 className="font-bold text-3xl text-[#000go000]">Login</h2>
+          <h2 className="font-bold text-3xl text-[#000000]">Login</h2>
           <p className="text-sm mt-4 text-[#112211]">
             If you already a member, easily log in now.
           </p>

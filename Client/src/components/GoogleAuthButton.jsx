@@ -3,77 +3,76 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
 const GoogleAuthButton = () => {
-  const { error, handleGoogleResponse } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { handleGoogleLogin } = useContext(AuthContext);
 
   useEffect(() => {
     const loadGoogleScript = () => {
-      return new Promise((resolve, reject) => {
-        if (window.google) {
-          resolve();
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.body.appendChild(script);
-      });
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
     };
 
-    const initializeGoogleButton = () => {
-      if (!window.google) return;
-      
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: async (response) => {
-          const success = await handleGoogleResponse(response);
-          if (success) {
-            navigate('/dashboard/form');
+    const cleanup = loadGoogleScript();
+
+    const initializeGoogle = setInterval(() => {
+      if (window.google) {
+        clearInterval(initializeGoogle);
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById('googleButton'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
           }
-        },
-        error_callback: (error) => {
-          console.error('Google Sign-In Error:', error);
-        }
-      });
-
-      window.google.accounts.id.renderButton(
-        document.getElementById("googleButton"),
-        {
-          theme: "outline",
-          size: "large",
-          text: "sign_in_with",
-          width: 250
-        }
-      );
-    };
-
-    const setup = async () => {
-      try {
-        await loadGoogleScript();
-        initializeGoogleButton();
-      } catch (error) {
-        console.error('Google button setup failed:', error);
+        );
       }
-    };
-
-    setup();
+    }, 100);
 
     return () => {
-      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-      if (script) {
-        document.body.removeChild(script);
-      }
+      clearInterval(initializeGoogle);
+      cleanup();
     };
-  }, [handleGoogleResponse, navigate]);
+  }, []);
+
+  const handleCredentialResponse = async (response) => {
+  try {
+    console.log('Google credential response:', response); // Debug log
+
+    if (!response.credential) {
+      console.error('No credential in response');
+      return;
+    }
+
+    const result = await handleGoogleLogin(response);
+    console.log('handleGoogleLogin result:', result); // Debug log
+
+    if (result) {
+      navigate('/dashboard/form');
+    } else {
+      console.error('Google login failed without error');
+    }
+  } catch (error) {
+    console.error('Google login error:', error);
+  }
+};
 
   return (
-    <div>
-      <div id="googleButton"></div>
-      {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
-    </div>
+    <div
+      id="googleButton"
+      className="w-full flex justify-center items-center min-h-[40px]"
+    ></div>
   );
 };
 
