@@ -117,7 +117,7 @@ def startup_event():
             initial_cities = [
                 Villes(nom="Marrakech", budget=1000),
                 Villes(nom="Casablanca", budget=2000),
-                Villes(nom="Fès", budget=1500),
+                Villes(nom="Fes", budget=1500),
                 Villes(nom="Tangier", budget=1200),
                 Villes(nom="Agadir", budget=1300),
                 Villes(nom="Rabat", budget=2500),
