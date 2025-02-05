@@ -24,7 +24,7 @@ export const ProfileProvider = ({ children }) => {
       setProfile(response.data);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch profile');
+      setError(err.response?.data?.detail?.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);
     }
@@ -36,11 +36,26 @@ export const ProfileProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob'
+        responseType: 'blob',
+        validateStatus: function (status) {
+          // Consider both 200 and 404 as valid responses
+          return (status >= 200 && status < 300) || status === 404;
+        },
       });
+
+      // If we got a 404 with the specific error code, return null
+      if (response.status === 404 && 
+          response.data?.detail?.code === 'NO_PROFILE_IMAGE') {
+        return null;
+      }
+
+      // If we got a successful response with image data
       return URL.createObjectURL(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch profile image');
+      // Only set error for unexpected errors
+      if (!err.response || err.response.status !== 404) {
+        setError(err.response?.data?.detail?.message || 'Failed to fetch profile image');
+      }
       return null;
     }
   }, [token]);
@@ -69,7 +84,7 @@ export const ProfileProvider = ({ children }) => {
       setTimeout(() => setSuccessMessage(null), 3000);
       return response.data;
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile image');
+      setError(err.response?.data?.detail?.message || 'Failed to update profile image');
       return null;
     } finally {
       setLoading(false);
@@ -95,7 +110,7 @@ export const ProfileProvider = ({ children }) => {
       setTimeout(() => setSuccessMessage(null), 3000);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+      setError(err.response?.data?.detail?.message || 'Failed to update profile');
       return false;
     } finally {
       setLoading(false);
@@ -124,7 +139,7 @@ export const ProfileProvider = ({ children }) => {
       setTimeout(() => setSuccessMessage(null), 3000);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || 'Password update failed');
+      setError(err.response?.data?.detail?.message || 'Password update failed');
       return false;
     } finally {
       setLoading(false);
