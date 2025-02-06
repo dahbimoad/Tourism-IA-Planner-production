@@ -8,8 +8,8 @@ import requests
 from pydantic import BaseModel, Field
 
 # Load datasets
-tourism_data_file = r"C:\Users\osaka\Desktop\New folder\Tourism-IA-Planner\Server\app\Ai\Comprehensive_Max_Tourism_Dataset.xlsx"
-transport_data_file = r"C:\Users\osaka\Desktop\New folder\Tourism-IA-Planner\Server\app\Ai\Comprehensive_Max_Transport_Dataset.xlsx"
+tourism_data_file = r"C:\Users\DELL Pc\clones\ProjetBadir\Tourism-IA-Planner\Server\app\Ai\Comprehensive_Max_Tourism_Dataset.xlsx"
+transport_data_file = r"C:\Users\DELL Pc\clones\ProjetBadir\Tourism-IA-Planner\Server\app\Ai\Comprehensive_Max_Transport_Dataset.xlsx"
 
 tourism_df = pd.read_excel(tourism_data_file)
 transport_df = pd.read_excel(transport_data_file)
