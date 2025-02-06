@@ -1,4 +1,3 @@
-// ProfileContext.jsx
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
@@ -24,7 +23,7 @@ export const ProfileProvider = ({ children }) => {
       setProfile(response.data);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.detail?.message || 'Failed to fetch profile');
+      setError(err.response?.data?.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);
     }
@@ -36,26 +35,11 @@ export const ProfileProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob',
-        validateStatus: function (status) {
-          // Consider both 200 and 404 as valid responses
-          return (status >= 200 && status < 300) || status === 404;
-        },
+        responseType: 'blob'
       });
-
-      // If we got a 404 with the specific error code, return null
-      if (response.status === 404 && 
-          response.data?.detail?.code === 'NO_PROFILE_IMAGE') {
-        return null;
-      }
-
-      // If we got a successful response with image data
       return URL.createObjectURL(response.data);
     } catch (err) {
-      // Only set error for unexpected errors
-      if (!err.response || err.response.status !== 404) {
-        setError(err.response?.data?.detail?.message || 'Failed to fetch profile image');
-      }
+      // Si l'image n'existe pas, on retourne simplement null sans erreur
       return null;
     }
   }, [token]);
@@ -84,7 +68,7 @@ export const ProfileProvider = ({ children }) => {
       setTimeout(() => setSuccessMessage(null), 3000);
       return response.data;
     } catch (err) {
-      setError(err.response?.data?.detail?.message || 'Failed to update profile image');
+      setError(err.response?.data?.message || 'Failed to update profile image');
       return null;
     } finally {
       setLoading(false);
