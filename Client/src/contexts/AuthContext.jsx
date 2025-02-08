@@ -108,10 +108,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setToken('');
-    setUser(null);
-    removeCookie('token', { path: '/' });
+  const logout = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Appel à l'API de déconnexion
+      await axios.post(`${API_URL}/user/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      // Nettoyage des données locales
+      setToken('');
+      setUser(null);
+      removeCookie('token', { path: '/' });
+      return true;
+    } catch (error) {
+      setError(getErrorMessage(error, 'Logout failed'));
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
