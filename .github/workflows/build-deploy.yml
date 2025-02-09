@@ -38,33 +38,4 @@ jobs:
           service_id: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
           api_key: ${{ secrets.RENDER_API_KEY }}
 
-  deploy-frontend:
-    needs: deploy-backend # Ensure the frontend waits for backend deployment
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout Code (Frontend)
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
-      # Step 2: Setup Node.js Environment
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18' # Or your preferred Node.js version
-
-      # Step 3: Install Frontend Dependencies
-      - name: Install Frontend Dependencies
-        working-directory: ./Client # Assuming your frontend is in a 'Client' directory
-        run: npm install # Or yarn install
-
-      # Step 4: Build Frontend
-      - name: Build Frontend
-        working-directory: ./Client
-        run: npm run build # Or yarn build
-
-      # Step 5: Deploy Frontend to Render
-      - name: Deploy Frontend to Render
-        uses: JorgeLNJunior/render-deploy@v1.3.2
-        with:
-          service_id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
-          api_key: ${{ secrets.RENDER_API_KEY }}
