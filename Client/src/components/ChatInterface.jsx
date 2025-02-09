@@ -1,3 +1,4 @@
+// ChatInterface.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { FaTimes, FaPaperPlane, FaUser, FaRobot, FaSpinner, FaChevronDown } from "react-icons/fa";
 import { ChatProvider, useChat } from '../contexts/ChatContext';
@@ -5,7 +6,7 @@ import { ChatProvider, useChat } from '../contexts/ChatContext';
 const ChatInterface = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(true);
-  const { messages, sendMessage, loading, error, successMessage } = useChat();
+  const { messages, sendMessage, loading, error } = useChat();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -23,33 +24,46 @@ const ChatInterface = ({ onClose }) => {
     }
   };
 
-  const MessageBubble = ({ msg, index }) => (
-    <div 
-      key={index}
-      className={`flex ${msg.type === 'bot' ? "justify-start" : "justify-end"} gap-2 mb-2`}
-    >
-      <div 
-        className={`p-3 rounded-lg max-w-[80%] ${
-          msg.type === 'bot' 
-            ? "bg-gray-100 text-gray-800 shadow-sm"
-            : "bg-[#8DD3BB] text-white"
-        }`}
-        aria-label={`Message from ${msg.type === 'bot' ? 'Travel Bot' : 'You'}`}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          {msg.type === 'bot' ? (
-            <FaRobot className="text-gray-600" aria-hidden="true" />
-          ) : (
-            <FaUser className="text-white" aria-hidden="true" />
-          )}
-          <span className="text-xs font-medium">
-            {msg.type === 'bot' ? "Travel Bot" : "You"}
-          </span>
+  const MessageBubble = ({ msg, index }) => {
+    // Handle error responses
+    if (msg.status === "error") {
+      return (
+        <div className="flex justify-center mb-4">
+          <div className="bg-red-100 text-red-700 p-3 rounded-lg max-w-[80%] text-center">
+            {msg.response}
+          </div>
         </div>
-        <p className="text-sm break-words">{msg.content}</p>
+      );
+    }
+
+    return (
+      <div
+        key={index}
+        className={`flex ${msg.type === 'bot' ? "justify-start" : "justify-end"} gap-2 mb-2`}
+      >
+        <div
+          className={`p-3 rounded-lg max-w-[80%] ${
+            msg.type === 'bot' 
+              ? "bg-gray-100 text-gray-800 shadow-sm"
+              : "bg-[#8DD3BB] text-white"
+          }`}
+          aria-label={`Message from ${msg.type === 'bot' ? 'Travel Bot' : 'You'}`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            {msg.type === 'bot' ? (
+              <FaRobot className="text-gray-600" aria-hidden="true" />
+            ) : (
+              <FaUser className="text-white" aria-hidden="true" />
+            )}
+            <span className="text-xs font-medium">
+              {msg.type === 'bot' ? "Travel Bot" : "You"}
+            </span>
+          </div>
+          <p className="text-sm break-words whitespace-pre-wrap">{msg.content || msg.response}</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className={`
@@ -59,18 +73,18 @@ const ChatInterface = ({ onClose }) => {
       overflow-hidden
     `}>
       {/* Header */}
-      <div 
+      <div
         className="bg-gray-800 text-white p-4 rounded-t-lg flex justify-between items-center cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h3 className="font-semibold flex items-center">
           Travel Assistant
-          <FaChevronDown 
+          <FaChevronDown
             className={`ml-2 transition-transform duration-300 
-              ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
+              ${isExpanded ? 'rotate-180' : 'rotate-0'}`}
           />
         </h3>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             onClose();
@@ -88,11 +102,19 @@ const ChatInterface = ({ onClose }) => {
           {messages.map((msg, index) => (
             <MessageBubble key={msg.id || index} msg={msg} index={index} />
           ))}
-          
+
           {loading && (
             <div className="flex justify-start items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <FaSpinner className="animate-spin text-gray-600" />
               <span className="text-sm text-gray-600">Travel Bot is typing...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex justify-center mb-4">
+              <div className="bg-red-100 text-red-700 p-3 rounded-lg max-w-[80%] text-center">
+                {error}
+              </div>
             </div>
           )}
 

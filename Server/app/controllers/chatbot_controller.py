@@ -6,22 +6,16 @@ from pydantic import BaseModel
 from app.services.chatbot_service import ChatbotService
 from app.db.database import get_db
 from fastapi.responses import JSONResponse
-from requests.exceptions import RequestException
 import uuid
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ChatMessage(BaseModel):
     message: str
 
-
-class ErrorResponse(BaseModel):
-    detail: str
-    error_code: str
-
-
 router = APIRouter()
 chatbot_service = ChatbotService()
-
 
 @router.post("")
 async def chat(
@@ -31,10 +25,11 @@ async def chat(
     try:
         if not chat_message.message.strip():
             return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_200_OK,  # Keep 200 for frontend compatibility
                 content={
-                    "detail": "Message cannot be empty",
-                    "error_code": "EMPTY_MESSAGE"
+                    "response": "Please enter a message",
+                    "status": "error",
+                    "error": "EMPTY_MESSAGE"
                 }
             )
 
@@ -45,43 +40,20 @@ async def chat(
             anonymous_user_id,
             chat_message.message
         )
-        return response
 
-    except HTTPException as he:
-        error_code = f"ERROR_{he.status_code}"
+        # Always return 200 status code for frontend compatibility
         return JSONResponse(
-            status_code=he.status_code,
-            content={
-                "detail": str(he.detail),
-                "error_code": error_code
-            }
-        )
-
-    except RequestException as e:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "detail": "The chat service is temporarily unavailable. Please try again later.",
-                "error_code": "SERVICE_UNAVAILABLE",
-                "additional_info": str(e)
-            }
-        )
-
-    except ValueError as ve:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "detail": str(ve),
-                "error_code": "VALIDATION_ERROR"
-            }
+            status_code=status.HTTP_200_OK,
+            content=response
         )
 
     except Exception as e:
-        print(f"Unexpected error in chat endpoint: {str(e)}")
+        logger.error(f"Chat endpoint error: {str(e)}")
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_200_OK,  # Keep 200 for frontend compatibility
             content={
-                "detail": "An unexpected error occurred. Please try again later.",
-                "error_code": "INTERNAL_SERVER_ERROR"
+                "response": "⚠️ The chat service is currently unavailable. Please try again later.",
+                "status": "error",
+                "error": "SERVICE_ERROR"
             }
         )
