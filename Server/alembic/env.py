@@ -1,21 +1,30 @@
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from dotenv import load_dotenv
+import os
 
-# Importez vos métadonnées ici
-from app.db.database import Base  # Chemin vers vos métadonnées
-from app.db.models import Plans, Preferences, User, Villes, Activities, Itineraires, Hotels, VilleItineraire, LieuxToVisit  # Assurez-vous d'importer tous vos modèles
+# Load environment variables from .env file
+load_dotenv()
 
-# Ce `Base.metadata` sera utilisé pour l'autogénération
+# Import your models
+from app.db.database import Base
+from app.db.models import Plans, Preferences, User, Villes, Activities, Itineraires, Hotels, VilleItineraire, LieuxToVisit
+
+# This will be used for autogeneration
 target_metadata = Base.metadata
 
-# Configuration Alembic
+# Get alembic config
 config = context.config
 
-# Configurez le fichier de log
+# Set up logging
 fileConfig(config.config_file_name)
 
+# Set the sqlalchemy.url value from environment variable
+config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+
 def run_migrations_offline():
+    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -28,6 +37,7 @@ def run_migrations_offline():
         context.run_migrations()
 
 def run_migrations_online():
+    """Run migrations in 'online' mode."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
