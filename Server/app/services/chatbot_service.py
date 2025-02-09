@@ -1,13 +1,18 @@
 # app/services/chatbot_service.py
-import requests
-from typing import Dict, List
+from openai import OpenAI, APIError, AuthenticationError, RateLimitError
+from typing import Dict
 from fastapi import HTTPException
 from app.core.config import settings
+import asyncio
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ChatbotService:
     def __init__(self):
-        self.base_url = settings.OLLAMA_BASE_URL
-        self.model = settings.OLLAMA_MODEL
+        self.client = OpenAI(api_key=settings.AI_API_KEY)
+        self.model = settings.AI_MODEL
         self.timeout = settings.OLLAMA_TIMEOUT
         self.max_history = settings.MAX_CONVERSATION_HISTORY
         self.conversation_history = {}
@@ -23,7 +28,7 @@ class ChatbotService:
                 for msg in self.conversation_history[user_id][-self.max_history:]
             ])
 
-            # Create a tourism-focused prompt
+            # Create tourism-focused prompt
             prompt = f"""You are a knowledgeable Moroccan tourism assistant. Help users plan their trips, 
             recommend places to visit, and provide information about local customs, transportation, and accommodations.
 
@@ -34,33 +39,29 @@ class ChatbotService:
             Assistant:"""
 
             try:
-                # Make request to Ollama
-                response = requests.post(
-                    f"{self.base_url}/generate",
-                    json={
-                        "model": self.model,
-                        "prompt": prompt,
-                        "stream": False
-                    },
-                    timeout=self.timeout
+                # Make request to OpenAI
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: self.client.chat.completions.create(
+                        model=self.model,
+                        messages=[
+                            {"role": "system", "content": "You are a helpful Moroccan tourism assistant."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=1000
+                    )
                 )
 
-                # Print response for debugging
-                print(f"Ollama response status: {response.status_code}")
-                print(f"Ollama response: {response.text}")
-
-                if response.status_code != 200:
-                    error_msg = f"Ollama API error: {response.text}"
-                    print(error_msg)
-                    raise HTTPException(status_code=500, detail=error_msg)
-
                 # Get the response
-                response_json = response.json()
-                assistant_response = response_json.get('response', '')
+                assistant_response = response.choices[0].message.content
 
                 if not assistant_response:
-                    print("Empty response from Ollama")
-                    raise HTTPException(status_code=500, detail="Empty response from Ollama")
+                    logger.error("Empty response from OpenAI")
+                    return {
+                        "response": "I apologize, but I couldn't generate a response at the moment. Please try again.",
+                        "status": "error"
+                    }
 
                 # Update conversation history
                 self.conversation_history[user_id].extend([
@@ -68,7 +69,7 @@ class ChatbotService:
                     {"role": "assistant", "content": assistant_response}
                 ])
 
-                # Trim conversation history if it exceeds max length
+                # Trim conversation history
                 if len(self.conversation_history[user_id]) > self.max_history * 2:
                     self.conversation_history[user_id] = (
                         self.conversation_history[user_id][-self.max_history * 2:]
@@ -79,20 +80,45 @@ class ChatbotService:
                     "status": "success"
                 }
 
-            except requests.exceptions.ConnectionError:
-                error_msg = f"Could not connect to Ollama. Make sure Ollama is running with: ollama run {self.model}"
-                print(error_msg)
-                raise HTTPException(status_code=500, detail=error_msg)
+            except AuthenticationError as auth_error:
+                logger.error(f"Authentication error: {str(auth_error)}")
+                return {
+                    "response": "There was an issue with the AI service authentication. Please try again later.",
+                    "status": "error",
+                    "error": "API_KEY_ERROR"
+                }
 
-            except requests.exceptions.Timeout:
-                error_msg = f"Request to Ollama timed out after {self.timeout} seconds"
-                print(error_msg)
-                raise HTTPException(status_code=500, detail=error_msg)
+            except RateLimitError:
+                logger.error("Rate limit exceeded")
+                return {
+                    "response": "The service is currently experiencing high demand. Please try again in a few moments.",
+                    "status": "error",
+                    "error": "RATE_LIMIT_ERROR"
+                }
+
+            except APIError as api_error:
+                logger.error(f"OpenAI API error: {str(api_error)}")
+                return {
+                    "response": "The AI service is temporarily unavailable. Please try again later.",
+                    "status": "error",
+                    "error": "API_ERROR"
+                }
+
+            except Exception as e:
+                logger.error(f"Unexpected API error: {str(e)}")
+                return {
+                    "response": "An unexpected error occurred. Please try again later.",
+                    "status": "error",
+                    "error": "UNEXPECTED_ERROR"
+                }
 
         except Exception as e:
-            error_msg = f"Error in chatbot service: {str(e)}"
-            print(error_msg)
-            raise HTTPException(status_code=500, detail=error_msg)
+            logger.error(f"Service error: {str(e)}")
+            return {
+                "response": "The service is currently unavailable. Please try again later.",
+                "status": "error",
+                "error": "SERVICE_ERROR"
+            }
 
 # Create a singleton instance
 chatbot_service = ChatbotService()
