@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr, Field, field_validator
 import re
 
@@ -5,8 +7,28 @@ import re
 class UserCreate(BaseModel):
     nom: str
     prenom: str
-    email: EmailStr  # Validate that the email is in proper format
+    email: EmailStr
     password: str
+
+    @field_validator('password')
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        if not re.search(r'[A-Z]', v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r'[a-z]', v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r'\d', v):
+            raise ValueError("Password must contain at least one number")
+        return v
+
+    @field_validator('nom', 'prenom')
+    def validate_name(cls, v, field):
+        if len(v.strip()) < 2:
+            raise ValueError(f"{field.name.title()} must be at least 2 characters")
+        if not v.strip().isalpha():
+            raise ValueError(f"{field.name.title()} must contain only letters")
+        return v.strip().title()
 
     class Config:
         orm_mode = True
@@ -31,9 +53,9 @@ class UserOut(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    nom: str | None = None
-    prenom: str | None = None
-    email: EmailStr | None = None
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    email: Optional[EmailStr] = None
 
     class Config:
         from_attributes = True
