@@ -25,12 +25,12 @@ const FavouritesPlans = () => {
   }, [favorites]);
 
   const formatCurrency = (amount) => {
-    if (typeof amount !== 'number') return '0.00 MAD';
+    if (typeof amount !== 'number') return '0 MAD';
     return new Intl.NumberFormat("fr-MA", {
       style: "currency",
       currency: "MAD",
-      minimumFractionDigits: 2,
-    }).format(amount);
+      minimumFractionDigits: 0,
+    }).format(Math.round(amount));
   };
 
   const renderCityDays = (plan) => {
@@ -41,10 +41,10 @@ const FavouritesPlans = () => {
         key={index} 
         className="flex justify-between items-center mb-2 hover:bg-gray-50 p-2 rounded-lg transition-colors duration-300"
       >
-        <span className="text-gray-600 font-medium">{city?.city || 'Ville inconnue'}</span>
+        <span className="text-gray-600 font-medium">{city?.city || 'Unknown city'}</span>
         <span className="flex items-center text-gray-700">
           <Calendar className="mr-1 w-4 h-4 text-teal-500" />
-          {city?.days_spent || 0} jour{(city?.days_spent || 0) > 1 ? "s" : ""}
+          {Math.round(city?.days_spent || 0)} day{Math.round(city?.days_spent || 0) > 1 ? "s" : ""}
         </span>
       </div>
     ));
@@ -91,7 +91,7 @@ const FavouritesPlans = () => {
         <div className="p-6 space-y-4">
           <h3 className="text-xl font-bold flex items-center text-gray-800">
             <MapPin className="mr-2 w-5 h-5 text-teal-500" />
-            Plan Favori {index + 1}
+            Favorite Plan {index + 1}
           </h3>
 
           <p className="flex items-center text-gray-700 font-medium">
@@ -103,15 +103,15 @@ const FavouritesPlans = () => {
             <div className="flex justify-between items-center mb-4">
               <h4 className="font-semibold flex items-center text-gray-800">
                 <Calendar className="mr-2 w-5 h-5 text-teal-500" />
-                Durée totale:
+                Total Duration:
               </h4>
               <span className="text-gray-700">
-                {total_days_spent} jours
+                {Math.round(total_days_spent)} days
               </span>
             </div>
             
             <h4 className="font-semibold text-gray-800 mb-2">
-              Détails par ville:
+              Details by City:
             </h4>
             <div className="space-y-1">
               {renderCityDays(favorite.favorite_data)}
@@ -119,14 +119,14 @@ const FavouritesPlans = () => {
           </div>
 
           <div className="space-y-2 pt-4">
-            <h4 className="font-semibold text-gray-800 mb-2">Répartition du budget:</h4>
+            <h4 className="font-semibold text-gray-800 mb-2">Budget Breakdown:</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between">
-                <span>Hôtels:</span>
+                <span>Hotels:</span>
                 <span>{formatCurrency(breakdown.hotels_total)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Activités:</span>
+                <span>Activities:</span>
                 <span>{formatCurrency(breakdown.activities_total)}</span>
               </div>
               <div className="flex justify-between">
@@ -142,7 +142,7 @@ const FavouritesPlans = () => {
             transition-all duration-300 hover:shadow-lg hover:from-teal-500 hover:to-teal-600 
             focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transform hover:-translate-y-0.5"
           >
-            Voir les détails
+            View Details
           </button>
         </div>
       </div>
@@ -153,7 +153,7 @@ const FavouritesPlans = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-800 py-16">Chargement...</h1>
+          <h1 className="text-4xl font-bold text-gray-800 py-16">Loading...</h1>
         </div>
       </div>
     );
@@ -163,9 +163,9 @@ const FavouritesPlans = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 py-16 transition-all duration-500 hover:scale-105">
-          Vos Plans{" "}
+          Your Favorite{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-teal-600">
-            Favoris
+            Plans
           </span>
         </h1>
 
@@ -176,13 +176,13 @@ const FavouritesPlans = () => {
         ) : (
           <div className="text-center p-12 bg-white rounded-xl shadow-lg">
             <p className="text-gray-500 text-lg">
-              Vous n'avez pas encore de plans favoris
+              You don't have any favorite plans yet
             </p>
             <button
               onClick={() => navigate('/dashboard/plans')}
               className="mt-4 px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors duration-300"
             >
-              Découvrir les plans
+              Discover Plans
             </button>
           </div>
         )}
