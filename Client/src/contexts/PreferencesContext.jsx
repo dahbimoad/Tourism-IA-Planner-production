@@ -1,70 +1,108 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const PreferencesContext = createContext();
 
+const STORAGE_KEYS = {
+  PREFERENCES: 'userPreferences',
+  GENERATED_PLANS: 'generatedPlans'
+};
+
 export const PreferencesProvider = ({ children }) => {
   const { token } = useContext(AuthContext);
+  
+  const [preferences, setPreferences] = useState(() => {
+    const savedPreferences = localStorage.getItem(STORAGE_KEYS.PREFERENCES);
+    return savedPreferences ? JSON.parse(savedPreferences) : [];
+  });
+
+  const [generatedPlans, setGeneratedPlans] = useState(() => {
+    const savedPlans = localStorage.getItem(STORAGE_KEYS.GENERATED_PLANS);
+    return savedPlans ? JSON.parse(savedPlans) : [];
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(preferences));
+  }, [preferences]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.GENERATED_PLANS, JSON.stringify(generatedPlans));
+  }, [generatedPlans]);
 
   const handleCreatePreference = async (preferenceData) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${API_URL}/preferences/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${API_URL}/preferences/`,
+        {
           lieuDepart: preferenceData.lieuDepart,
           cities: preferenceData.cities,
           dateDepart: preferenceData.dateDepart,
           dateRetour: preferenceData.dateRetour,
           budget: parseFloat(preferenceData.budget)
-        })
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          }
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Une erreur est survenue' }));
-        throw new Error(errorData.message || `Erreur ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
+      
+      // Vider le localStorage avant de mettre à jour avec les nouvelles données
+      localStorage.removeItem(STORAGE_KEYS.PREFERENCES);
+      localStorage.removeItem(STORAGE_KEYS.GENERATED_PLANS);
+      
+      // Mettre à jour les états avec uniquement les nouvelles données
+      setPreferences([data.preference]);
+      setGeneratedPlans(data.generated_plans);
+      
       return data;
     } catch (error) {
-      console.error('Erreur dans handleCreatePreference:', error);
-      throw new Error(error.message || 'Erreur lors de la création de la préférence');
+      let errorMessage = 'Une erreur est survenue';
+      
+      if (error.response) {
+        const errorData = error.response.data;
+        errorMessage = errorData.message || `Erreur ${error.response.status}`;
+      } else if (error.request) {
+        errorMessage = 'Pas de réponse du serveur';
+      } else {
+        errorMessage = error.message;
+      }
+
+      console.error('Erreur lors de la création de la préférence:', error);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getPreferences = async () => {
-    try {
-      const response = await fetch(`${API_URL}/preferences/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Erreur dans getPreferences:', error);
-      throw error;
-    }
+  const clearStoredData = () => {
+    localStorage.removeItem(STORAGE_KEYS.PREFERENCES);
+    localStorage.removeItem(STORAGE_KEYS.GENERATED_PLANS);
+    setPreferences([]);
+    setGeneratedPlans([]);
   };
 
   return (
     <PreferencesContext.Provider 
       value={{ 
         handleCreatePreference,
-        getPreferences
+        preferences,
+        generatedPlans,
+        isLoading,
+        error,
+        clearStoredData
       }}
     >
       {children}
@@ -72,7 +110,6 @@ export const PreferencesProvider = ({ children }) => {
   );
 };
 
-// Hook personnalisé
 export const usePreferences = () => {
   const context = useContext(PreferencesContext);
   if (!context) {
