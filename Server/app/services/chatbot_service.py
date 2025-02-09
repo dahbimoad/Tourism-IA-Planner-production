@@ -4,7 +4,6 @@ from typing import Dict
 from fastapi import HTTPException
 from app.core.config import settings
 import asyncio
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,16 +27,6 @@ class ChatbotService:
                 for msg in self.conversation_history[user_id][-self.max_history:]
             ])
 
-            # Create tourism-focused prompt
-            prompt = f"""You are a knowledgeable Moroccan tourism assistant. Help users plan their trips, 
-            recommend places to visit, and provide information about local customs, transportation, and accommodations.
-
-            Previous conversation:
-            {context}
-
-            User: {message}
-            Assistant:"""
-
             try:
                 # Make request to OpenAI
                 response = await asyncio.get_event_loop().run_in_executor(
@@ -46,35 +35,14 @@ class ChatbotService:
                         model=self.model,
                         messages=[
                             {"role": "system", "content": "You are a helpful Moroccan tourism assistant."},
-                            {"role": "user", "content": prompt}
+                            {"role": "user", "content": message}
                         ],
                         temperature=0.7,
                         max_tokens=1000
                     )
                 )
 
-                # Get the response
                 assistant_response = response.choices[0].message.content
-
-                if not assistant_response:
-                    logger.error("Empty response from OpenAI")
-                    return {
-                        "response": "I apologize, but I couldn't generate a response at the moment. Please try again.",
-                        "status": "error"
-                    }
-
-                # Update conversation history
-                self.conversation_history[user_id].extend([
-                    {"role": "user", "content": message},
-                    {"role": "assistant", "content": assistant_response}
-                ])
-
-                # Trim conversation history
-                if len(self.conversation_history[user_id]) > self.max_history * 2:
-                    self.conversation_history[user_id] = (
-                        self.conversation_history[user_id][-self.max_history * 2:]
-                    )
-
                 return {
                     "response": assistant_response,
                     "status": "success"
@@ -83,39 +51,30 @@ class ChatbotService:
             except AuthenticationError as auth_error:
                 logger.error(f"Authentication error: {str(auth_error)}")
                 return {
-                    "response": "There was an issue with the AI service authentication. Please try again later.",
+                    "response": "⚠️ The chat service is currently unavailable. Our team is working on it. Please try again later.",
                     "status": "error",
-                    "error": "API_KEY_ERROR"
+                    "error": "SERVICE_UNAVAILABLE"
                 }
 
             except RateLimitError:
-                logger.error("Rate limit exceeded")
                 return {
-                    "response": "The service is currently experiencing high demand. Please try again in a few moments.",
+                    "response": "The service is experiencing high demand. Please try again in a few moments.",
                     "status": "error",
-                    "error": "RATE_LIMIT_ERROR"
-                }
-
-            except APIError as api_error:
-                logger.error(f"OpenAI API error: {str(api_error)}")
-                return {
-                    "response": "The AI service is temporarily unavailable. Please try again later.",
-                    "status": "error",
-                    "error": "API_ERROR"
+                    "error": "RATE_LIMIT"
                 }
 
             except Exception as e:
-                logger.error(f"Unexpected API error: {str(e)}")
+                logger.error(f"OpenAI API error: {str(e)}")
                 return {
-                    "response": "An unexpected error occurred. Please try again later.",
+                    "response": "⚠️ Service temporarily unavailable. Please try again later.",
                     "status": "error",
-                    "error": "UNEXPECTED_ERROR"
+                    "error": "API_ERROR"
                 }
 
         except Exception as e:
             logger.error(f"Service error: {str(e)}")
             return {
-                "response": "The service is currently unavailable. Please try again later.",
+                "response": "⚠️ Service temporarily unavailable. Please try again later.",
                 "status": "error",
                 "error": "SERVICE_ERROR"
             }

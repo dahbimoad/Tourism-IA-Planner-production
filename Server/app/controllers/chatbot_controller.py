@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.services.chatbot_service import ChatbotService
 from app.db.database import get_db
 from fastapi.responses import JSONResponse
+import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,41 +23,37 @@ async def chat(
         db: Session = Depends(get_db)
 ) -> Dict:
     try:
-        # Validate input
         if not chat_message.message.strip():
-            return {
-                "response": "Message cannot be empty",
-                "status": "error",
-                "error": "EMPTY_MESSAGE"
-            }
-
-        # Get response from chatbot service
-        response = await chatbot_service.get_response("user", chat_message.message)
-
-        # If the response indicates an error
-        if response.get("status") == "error":
             return JSONResponse(
-                status_code=status.HTTP_200_OK,  # Keep 200 to maintain frontend compatibility
+                status_code=status.HTTP_200_OK,  # Keep 200 for frontend compatibility
                 content={
-                    "response": response.get("response"),
+                    "response": "Please enter a message",
                     "status": "error",
-                    "error": response.get("error", "UNKNOWN_ERROR")
+                    "error": "EMPTY_MESSAGE"
                 }
             )
 
-        # Return successful response
+        # Generate a random user ID for non-authenticated users
+        anonymous_user_id = str(uuid.uuid4())
+
+        response = await chatbot_service.get_response(
+            anonymous_user_id,
+            chat_message.message
+        )
+
+        # Always return 200 status code for frontend compatibility
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=response
         )
 
     except Exception as e:
-        logger.error(f"Controller error: {str(e)}")
+        logger.error(f"Chat endpoint error: {str(e)}")
         return JSONResponse(
-            status_code=status.HTTP_200_OK,  # Keep 200 to maintain frontend compatibility
+            status_code=status.HTTP_200_OK,  # Keep 200 for frontend compatibility
             content={
-                "response": "An unexpected error occurred. Please try again later.",
+                "response": "⚠️ The chat service is currently unavailable. Please try again later.",
                 "status": "error",
-                "error": "INTERNAL_SERVER_ERROR"
+                "error": "SERVICE_ERROR"
             }
         )
