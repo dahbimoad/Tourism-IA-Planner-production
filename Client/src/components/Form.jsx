@@ -77,7 +77,7 @@ const TravelPlanForm = () => {
       return;
     }
     if (!budget || parseFloat(budget) <= 500) {
-      showError("Budget must be greater than $500");
+      showError("The budget must be greater than 500 MAD");
       return;
     }
 
@@ -254,7 +254,7 @@ const TravelPlanForm = () => {
                 type="number"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
-                placeholder="Your budget $"
+                placeholder="Your budget in MAD"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#030303ae] focus:border-[#0808087e] h-12"
               />
             </div>
