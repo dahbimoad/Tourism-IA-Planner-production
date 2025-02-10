@@ -98,7 +98,7 @@ const TravelPlanForm = () => {
   }
 
   if (citiesToVisit.length > tripDuration) {
-    showError(Number of cities (${citiesToVisit.length}) cannot exceed the trip duration (${tripDuration} days));
+    showError(`Number of cities (${citiesToVisit.length}) cannot exceed the trip duration (${tripDuration} days)`);
     return;
   }
 
