@@ -37,6 +37,7 @@
     "react-router-dom": "^7.1.1",
     "react-select": "^5.9.0",
     "react-toastify": "^11.0.3",
+    "sweetalert2": "^11.16.0",
     "tailwind-merge": "^3.0.1",
     "three": "^0.171.0"
   },

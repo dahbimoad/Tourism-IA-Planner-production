@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Wallet, Calendar, Star } from "lucide-react";
+import { MapPin, Wallet, Calendar, Star, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "../contexts/PreferencesContext";
 import { TOURISM_IMAGES } from "../assets/tourismImages";
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
 const FavouritesPlans = () => {
-  const { favorites } = usePreferences();
+  const { favorites, removeFromFavorites, isLoading } = usePreferences();
   const navigate = useNavigate();
   const [selectedCard, setSelectedCard] = useState(null);
   const [cachedImages, setCachedImages] = useState(() => {
@@ -23,6 +25,40 @@ const FavouritesPlans = () => {
     setCachedImages(newImages);
     sessionStorage.setItem("favoriteImages", JSON.stringify(newImages));
   }, [favorites]);
+
+  const handleDelete = async (index, event) => {
+    event.stopPropagation();
+  
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to remove this plan from favorites?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      const success = await removeFromFavorites(index);
+      if (!success) throw new Error('Failed to remove from favorites.');
+  
+      setCachedImages(prevImages => {
+        const updatedImages = { ...prevImages };
+        delete updatedImages[index];
+        sessionStorage.setItem("favoriteImages", JSON.stringify(updatedImages));
+        return updatedImages;
+      });
+  
+      Swal.fire('Deleted!', 'The plan has been removed from favorites.', 'success');
+    } catch (error) {
+      console.error('Error deleting favorite:', error);
+      Swal.fire('Error', 'Failed to delete the plan.', 'error');
+    }
+  };
+  
 
   const formatCurrency = (amount) => {
     if (typeof amount !== 'number') return '0 MAD';
@@ -86,6 +122,17 @@ const FavouritesPlans = () => {
           <div className="absolute top-2 right-2">
             <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
           </div>
+          {/* Bouton de suppression */}
+          <button
+  onClick={(e) => handleDelete(index, e)}
+  disabled={isLoading}
+  className="absolute top-2 left-2 p-2 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 
+  transition-all duration-300 hover:bg-red-600 transform hover:scale-110
+  disabled:opacity-50 disabled:cursor-not-allowed"
+  title="Supprimer des favoris"
+>
+  <Trash2 className="w-4 h-4" />
+</button>
         </div>
 
         <div className="p-6 space-y-4">
