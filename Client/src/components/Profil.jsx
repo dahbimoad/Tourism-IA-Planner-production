@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaEye, FaEyeSlash, FaCamera } from "react-icons/fa";
 import { useProfile } from "../contexts/ProfileContext";
 
+const defaultAvatar = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZmZmZiIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjMzLTggNHYyaDE2di0yYzAtMi42Ny01LjMzLTQtOC00eiIvPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48L3N2Zz4=`;
+
 const Profil = () => {
   const { profile, loading, error, successMessage, updateProfile, changePassword, updateProfileImage, getProfileImage } = useProfile();
   const [formData, setFormData] = useState({
@@ -195,13 +197,13 @@ const Profil = () => {
         className="max-w-4xl mx-auto p-6 bg-[#eef0ef] rounded-xl shadow-lg"
       >
         <div className="space-y-8">
-          <div className="flex flex-col items-center space-y-4">
-            <motion.div whileHover={{ scale: 1.05 }} className="relative">
-              <img
-                src={imagePreview || formData.avatar}
-                alt="Profile"
-                className="w-32 h-32 rounded-full object-cover"
-              />
+        <div className="flex flex-col items-center space-y-4">
+        <motion.div whileHover={{ scale: 1.05 }} className="relative">
+          <img
+            src={imagePreview || formData.avatar || defaultAvatar}
+            alt="Profile"
+            className="w-32 h-32 rounded-full object-cover"
+          />
               <label
                 htmlFor="avatar-upload"
                 className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
