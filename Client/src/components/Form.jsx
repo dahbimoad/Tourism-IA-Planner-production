@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import {
   FaPlane,
   FaMapMarkerAlt,
@@ -8,10 +9,11 @@ import {
   FaSpinner,
 } from "react-icons/fa";
 import { usePreferences } from '../contexts/PreferencesContext';
+import 'animate.css'; // Add animate.css for animations
 
 const TravelPlanForm = () => {
   const { handleCreatePreference } = usePreferences();
-  const navigate = useNavigate(); // Initialisation du hook
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [departureCity, setDepartureCity] = useState("");
   const [citiesToVisit, setCitiesToVisit] = useState([]);
@@ -30,6 +32,18 @@ const TravelPlanForm = () => {
     "Essaouira",
   ];
 
+  const showError = (message) => {
+    Swal.fire({
+      title: 'Oops!',
+      text: message,
+      icon: 'error',
+      confirmButtonText: 'Got it',
+      customClass: {
+        popup: 'animate__animated animate__shakeX'
+      }
+    });
+  };
+
   const handleAddCity = (e) => {
     const city = e.target.value;
     if (city && !citiesToVisit.includes(city)) {
@@ -45,24 +59,41 @@ const TravelPlanForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation with English error messages using SweetAlert2
     if (!departureCity) {
-      alert("Veuillez choisir une ville de départ");
+      showError("Please choose a departure city");
       return;
     }
     if (citiesToVisit.length === 0) {
-      alert("Veuillez sélectionner au moins une ville à visiter");
+      showError("Please select at least one city to visit");
       return;
     }
     if (!departureDate) {
-      alert("Veuillez sélectionner une date de départ");
+      showError("Please select a departure date");
       return;
     }
     if (!returnDate) {
-      alert("Veuillez sélectionner une date de retour");
+      showError("Please select a return date");
       return;
     }
-    if (!budget || parseFloat(budget) <= 0) {
-      alert("Veuillez entrer un budget valide");
+    if (!budget || parseFloat(budget) <= 500) {
+      showError("Budget must be greater than $500");
+      return;
+    }
+
+    // Validation des dates
+    const departure = new Date(departureDate);
+    const return_date = new Date(returnDate);
+
+    if (return_date <= departure) {
+      showError("Return date must be after departure date");
+      return;
+    }
+
+    // Calcul de la différence en jours
+    const tripDuration = Math.ceil((return_date - departure) / (1000 * 60 * 60 * 24));
+    if (tripDuration > 90) {
+      showError("Trip duration cannot exceed 90 days");
       return;
     }
 
@@ -77,7 +108,17 @@ const TravelPlanForm = () => {
     setIsLoading(true);
     try {
       const response = await handleCreatePreference(preferenceData);
-      console.log('Création réussie :', response);
+      Swal.fire({
+        title: 'Success!',
+        text: 'Your travel plan has been created',
+        icon: 'success',
+        confirmButtonText: 'Great!',
+        customClass: {
+          popup: 'animate__animated animate__bounceIn'
+        }
+      });
+      
+      // Reset form and navigate
       setDepartureCity('');
       setCitiesToVisit([]);
       setDepartureDate('');
@@ -85,8 +126,7 @@ const TravelPlanForm = () => {
       setBudget('');
       navigate('/dashboard/plans');
     } catch (error) {
-      console.error('Erreur lors de la création :', error);
-      alert(error.message || 'Une erreur est survenue lors de la création de la préférence.');
+      showError(error.message || 'An error occurred while creating the preference');
     } finally {
       setIsLoading(false);
     }

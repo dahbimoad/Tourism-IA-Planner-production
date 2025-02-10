@@ -10,7 +10,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProfileProvider } from './contexts/ProfileContext'; // Add ProfileProvider
 import { PreferencesProvider } from './contexts/PreferencesContext';
 import UserInterface from "./pages/UserInterface";
-
+import Home1 from "./pages/Home1";
 // Import des composants
 import PrivateRoute from "./components/PrivateRoute";
 import Form from "./components/Form";
@@ -33,6 +33,7 @@ const App = () => {
           <Router>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home1 />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
 

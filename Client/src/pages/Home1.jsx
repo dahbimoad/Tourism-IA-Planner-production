@@ -1,5 +1,5 @@
 import React from 'react';
-import NavBar from '../components/NavBar';
+import NavBar1 from '../components/NavBar1';
 import AboutSection from '../components/AboutSection';
 import HeroSection from '../components/HeroSection';
 import ContactSection from '../components/ContactSection';
@@ -9,10 +9,10 @@ import FooterSection from "../components/FooterSection";
 
 
 
-const Home = () => {
+const Home1 = () => {
   return (
     <div>
-      <NavBar />
+      <NavBar1 />
       <HeroSection/>
       <AboutSection />
       <CarouselComponent />
@@ -23,4 +23,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Home1;

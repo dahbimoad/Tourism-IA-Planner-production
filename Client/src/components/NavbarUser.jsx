@@ -1,7 +1,56 @@
-import { useNavigate } from "react-router-dom";
 import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
+
+// Default avatar as base64 SVG
+const defaultAvatar = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZmZmZiIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjMzLTggNHYyaDE2di0yYzAtMi42Ny01LjMzLTQtOC00eiIvPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48L3N2Zz4=`;
+
+const Avatar = ({ imageUrl, name }) => (
+  <div className="w-10 rounded-full overflow-hidden">
+    {imageUrl ? (
+      <img
+        alt={`${name}'s avatar`}
+        src={imageUrl}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <img
+        alt="Default avatar"
+        src={defaultAvatar}
+        className="w-full h-full object-cover bg-gray-600"
+      />
+    )}
+  </div>
+);
+
+const NavLinks = ({ isMobile = false }) => {
+  const links = [
+    { href: "/home", text: "Home" },
+    { href: "/dashboard/form", text: "Find Plan" },
+    { href: "/dashboard/plans", text: "Plans" },
+    { href: "/dashboard/FavouritesPlans", text: "Favourites" },
+  ];
+
+  const className = isMobile
+    ? "menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+    : "menu menu-horizontal px-1";
+
+  return (
+    <ul className={className}>
+      {links.map(({ href, text }) => (
+        <li key={href}>
+          <a 
+            href={href} 
+            className={!isMobile ? "line-under hover:bg-transparent" : ""}
+          >
+            {text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 const NavbarUser = () => {
   const [menuActive, setMenuActive] = useState(false);
@@ -10,7 +59,6 @@ const NavbarUser = () => {
   const { profile, getProfileImage } = useProfile();
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Load profile image when component mounts or profile changes
   useEffect(() => {
     const loadImage = async () => {
       if (profile) {
@@ -20,10 +68,6 @@ const NavbarUser = () => {
     };
     loadImage();
   }, [profile, getProfileImage]);
-
-  const toggleMenu = () => {
-    setMenuActive(!menuActive);
-  };
 
   const handleLogout = async () => {
     const success = await logout();
@@ -35,12 +79,12 @@ const NavbarUser = () => {
   return (
     <div className="navbar bg-base-200 shadow-md fixed z-40">
       <div className="navbar-start">
-        <div className="dropdown">
+        <div className="dropdown lg:hidden">
           <div
             tabIndex={0}
             role="button"
-            onClick={toggleMenu}
-            className="btn btn-ghost lg:hidden"
+            onClick={() => setMenuActive(!menuActive)}
+            className="btn btn-ghost"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -57,38 +101,11 @@ const NavbarUser = () => {
               />
             </svg>
           </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-          >
-            <li><a href="/">Home</a></li>
-            <li><a href="/dashboard/form">Find Plan</a></li>
-            <li><a href="/dashboard/plans">Plans</a></li>
-            <li><a href="/dashboard/FavouritesPlans">Favourites</a></li>
-          </ul>
+          <NavLinks isMobile />
         </div>
 
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li>
-              <a href="/" className="line-under hover:bg-transparent">Home</a>
-            </li>
-            <li>
-              <a href="/dashboard/form" className="line-under hover:bg-transparent">
-                Find Plan
-              </a>
-            </li>
-            <li>
-              <a href="/dashboard/plans" className="line-under hover:bg-transparent">
-                Plans
-              </a>
-            </li>
-            <li>
-              <a href="/dashboard/FavouritesPlans" className="line-under hover:bg-transparent">
-                Favourites
-              </a>
-            </li>
-          </ul>
+          <NavLinks />
         </div>
       </div>
 
@@ -97,42 +114,37 @@ const NavbarUser = () => {
       </a>
       
       <div className="navbar-end">
+        {/* Notifications */}
         <div className="dropdown dropdown-end">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-            <button className="btn btn-ghost btn-circle">
-              <div className="indicator">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                <span className="badge badge-xs badge-primary indicator-item"></span>
-              </div>
-            </button>
+            <div className="indicator">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              <span className="badge badge-xs badge-primary indicator-item" />
+            </div>
           </div>
         </div>
 
+        {/* User Menu */}
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
             role="button"
             className="btn btn-ghost btn-circle avatar"
           >
-            <div className="w-10 rounded-full">
-              <img
-                alt="User avatar"
-                src={imagePreview || '/default-avatar.png'}
-              />
-            </div>
+            <Avatar imageUrl={imagePreview} name={profile?.name} />
           </div>
           <ul
             tabIndex={0}
