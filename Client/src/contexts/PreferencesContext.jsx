@@ -113,11 +113,9 @@ export const PreferencesProvider = ({ children }) => {
 
       const data = response.data;
 
-      // Vider le localStorage avant de mettre à jour avec les nouvelles données
       localStorage.removeItem(STORAGE_KEYS.PREFERENCES);
       localStorage.removeItem(STORAGE_KEYS.GENERATED_PLANS);
 
-      // Mettre à jour les états avec uniquement les nouvelles données
       setPreferences([data.preference]);
       setGeneratedPlans(data.generated_plans);
 
@@ -127,7 +125,29 @@ export const PreferencesProvider = ({ children }) => {
 
       if (error.response) {
         const errorData = error.response.data;
-        errorMessage = errorData.message || `Erreur ${error.response.status}`;
+        
+        // Gestion spécifique de l'erreur de budget insuffisant
+        if (errorData.detail?.error && errorData.detail.error.includes("Not enough budget")) {
+          const budgetError = errorData.detail.error;
+          // Extraction du message plus user-friendly
+          errorMessage = "Budget insuffisant. " + 
+            budgetError.substring(budgetError.indexOf("Not enough budget"));
+          
+          // Notification plus détaillée avec toast
+          toast.error("Budget exceeded! 🚨 Your budget is insufficient. Please increase it or reduce the number of cities. 😊💰.", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          // Gestion des autres types d'erreurs
+          errorMessage = errorData.detail?.message || 
+                        errorData.message || 
+                        `Erreur ${error.response.status}`;
+        }
       } else if (error.request) {
         errorMessage = "Pas de réponse du serveur";
       } else {
