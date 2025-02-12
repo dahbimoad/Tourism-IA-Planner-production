@@ -40,7 +40,7 @@ const NavBar = () => {
         </div>
         <a className="btn btn-ghost text-xl">
           <span>
-            L<span className="text-[#8DD3BB]">O</span>GO
+            TOURIST<span className="text-[#8DD3BB]">AI</span>
           </span>
         </a>
       </div>

@@ -1,17 +1,159 @@
-import React, { useState, useContext, useEffect } from "react";
-import { MapPin, Hotel, List, Plane, Clock, Star, Heart, MessageSquare } from "lucide-react";
+import React, { useState, useContext, useEffect, useRef } from "react";
+import { MapPin, Hotel, List, Plane, Clock, Star, Heart, MessageSquare, X, Send } from "lucide-react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { PreferencesContext } from '../contexts/PreferencesContext';
 import { useSearchParams } from "react-router-dom";
+import emailjs from '@emailjs/browser';
+import { Dialog } from "@headlessui/react";
+const FeedbackDialog = React.memo(({ 
+  isOpen, 
+  onClose, 
+  formRef,
+  feedbackForm,
+  handleInputChange,
+  handleSubmit,
+  isSending,
+  sendStatus 
+}) => (
+  <AnimatePresence>
+    {isOpen && (
+      <Dialog
+        open={isOpen}
+        onClose={onClose}
+        as={motion.div}
+        className="relative z-50"
+        static
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        />
 
+        <div className="fixed inset-0 flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="relative bg-white rounded-xl max-w-md w-full p-6 shadow-xl"
+          >
+            <button
+              onClick={onClose}
+              disabled={isSending}
+              className="absolute top-4 right-4 p-1 text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <Dialog.Title className="text-xl font-bold mb-4">
+              Share Your Feedback
+            </Dialog.Title>
+
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={feedbackForm.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={feedbackForm.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Message</label>
+                <textarea
+                  name="message"
+                  value={feedbackForm.message}
+                  onChange={handleInputChange}
+                  required
+                  rows="4"
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSending}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                
+                <button
+                  type="submit"
+                  disabled={isSending}
+                  className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 flex items-center"
+                >
+                  {isSending ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Feedback
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {sendStatus === 'success' && (
+                <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg">
+                  Feedback sent successfully! Thank you!
+                </div>
+              )}
+
+              {sendStatus === 'error' && (
+                <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                  Failed to send feedback. Please try again.
+                </div>
+              )}
+            </form>
+          </motion.div>
+        </div>
+      </Dialog>
+    )}
+  </AnimatePresence>
+));
 const Plan = () => {
-  const { preferences, generatedPlans, addToFavorites, favorites = [], setFavorites } = useContext(PreferencesContext);
+  const { preferences, generatedPlans, addToFavorites, favorites = [] } = useContext(PreferencesContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedPlanIndex, setSelectedPlanIndex] = useState(0);
   const [isFavoriting, setIsFavoriting] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
+  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSending, setIsSending] = useState(false);
+  const [sendStatus, setSendStatus] = useState(null);
+  const formRef = useRef();
 
   const MAD_RATE = 1;
 
@@ -26,7 +168,6 @@ const Plan = () => {
 
   const handleAddToFavorites = async () => {
     if (isFavoriting) return;
-
     setIsFavoriting(true);
     try {
       await addToFavorites(selectedPlanIndex);
@@ -37,6 +178,39 @@ const Plan = () => {
     }
   };
 
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    setIsSending(true);
+    setSendStatus(null);
+
+    try {
+      await emailjs.sendForm(
+        'service_riipxc4',
+        'template_omy9iet',
+        formRef.current,
+        '_DwsBrRywtSPiDULH'
+      );
+      
+      setSendStatus('success');
+      setFeedbackForm({ name: '', email: '', message: '' });
+      setTimeout(() => setIsFeedbackDialogOpen(false), 2000);
+    } catch (error) {
+      console.error('Failed to send feedback:', error);
+      setSendStatus('error');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    setFeedbackForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   if (!generatedPlans || generatedPlans.length === 0) {
     return (
       <motion.div 
@@ -44,7 +218,9 @@ const Plan = () => {
         animate={{ opacity: 1 }}
         className="flex h-screen items-center justify-center"
       >
-        <p className="text-gray-600 text-lg animate-pulse">No travel plans generated yet. Please set your preferences first.</p>
+        <p className="text-gray-600 text-lg animate-pulse">
+          No travel plans generated yet. Please set your preferences first.
+        </p>
       </motion.div>
     );
   }
@@ -66,6 +242,17 @@ const Plan = () => {
 
   return (
     <div className="pt-24 px-4 pb-12 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <FeedbackDialog 
+        isOpen={isFeedbackDialogOpen}
+        onClose={() => setIsFeedbackDialogOpen(false)}
+        formRef={formRef}
+        feedbackForm={feedbackForm}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleFeedbackSubmit}
+        isSending={isSending}
+        sendStatus={sendStatus}
+      />
+
       <motion.div 
         className="max-w-6xl mx-auto"
         initial="hidden"
@@ -265,6 +452,7 @@ const Plan = () => {
           </motion.button>
           
           <motion.button
+            onClick={() => setIsFeedbackDialogOpen(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center space-x-2 px-6 py-3 rounded-lg bg-white text-gray-600 hover:bg-gray-50 shadow-md transition-all duration-300"
