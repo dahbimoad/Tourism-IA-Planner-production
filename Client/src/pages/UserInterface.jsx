@@ -88,7 +88,7 @@ const UserInterface = () => {
                 exit="exit"
                 className="ml-2 bg-gray-800 text-white px-3 py-1 rounded-lg text-sm"
               >
-                Open ChatBot
+                Open Chatbot
               </motion.span>
             )}
           </AnimatePresence>

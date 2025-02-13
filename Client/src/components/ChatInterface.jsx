@@ -96,7 +96,7 @@ const ChatInterface = ({ onClose }) => {
         >
           <div className="flex items-center gap-2">
             <MessageCircle className="text-[#8DD3BB] dark:text-[#8DD3BB]" size={20} />
-            <h3 className="font-medium text-gray-900 dark:text-gray-100">Chat Assistant</h3>
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">Chatbot</h3>
           </div>
           <div className="flex items-center gap-2">
             <ChevronDown 
