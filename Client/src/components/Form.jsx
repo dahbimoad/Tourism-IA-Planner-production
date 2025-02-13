@@ -115,9 +115,9 @@ const TravelPlanForm = () => {
       await handleCreatePreference(preferenceData);
       Swal.fire({
         title: 'Success!',
-        text: 'Your travel plan has been created',
+        text: 'Your travel plan has been created with estimated prices, which may vary.',
         icon: 'success',
-        confirmButtonText: 'Great!',
+        confirmButtonText: 'Confirm and Proceed',
         customClass: {
           popup: 'animate_animated animate_bounceIn'
         }
