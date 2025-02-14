@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     AI_MAX_TOKENS: int = 1000
     AI_TEMPERATURE: float = 0.7
 
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_FROM_NAME: str
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str
+
     class Config:
         env_file = ".env"
 

@@ -9,7 +9,11 @@ from google.auth.transport import requests
 from app.core.config import settings
 from datetime import timedelta
 from pydantic import BaseModel
+from app.services.email_service import email_service
+import logging
 
+# Set up logging
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -29,6 +33,7 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
 
         # Validate required fields from Google token
         if 'email' not in idinfo:
+            logger.error("Email not found in Google token")
             return {
                 "status_code": status.HTTP_400_BAD_REQUEST,
                 "detail": {
@@ -42,8 +47,11 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
         nom = idinfo.get('family_name', '')
         prenom = idinfo.get('given_name', '')
 
+        logger.info(f"Processing Google authentication for email: {email}")
+
         # Check if user exists
         user = db.query(User).filter(User.email == email).first()
+        is_new_user = False
 
         if not user:
             try:
@@ -59,8 +67,23 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
                 db.add(user)
                 db.commit()
                 db.refresh(user)
+                is_new_user = True
+                logger.info(f"New user created with Google authentication: {email}")
+
+                # Send welcome email for new Google users
+                try:
+                    await email_service.send_google_welcome_email(
+                        email=user.email,
+                        name=f"{user.prenom} {user.nom}"
+                    )
+                    logger.info(f"Welcome email sent successfully to: {email}")
+                except Exception as email_error:
+                    logger.error(f"Failed to send welcome email to {email}: {str(email_error)}")
+                    # Continue with registration even if email fails
+
             except Exception as db_error:
                 db.rollback()
+                logger.error(f"Database error during user creation: {str(db_error)}")
                 return {
                     "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                     "detail": {
@@ -79,7 +102,9 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
                 },
                 expires_delta=timedelta(minutes=30)
             )
+            logger.info(f"Access token created successfully for user: {email}")
         except Exception as token_error:
+            logger.error(f"Token creation error for {email}: {str(token_error)}")
             return {
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "detail": {
@@ -97,10 +122,12 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
                 "email": user.email,
                 "nom": user.nom,
                 "prenom": user.prenom
-            }
+            },
+            "is_new_user": is_new_user  # Added to indicate if this is a new registration
         }
 
     except ValueError as ve:
+        logger.error(f"Invalid Google token: {str(ve)}")
         return {
             "status_code": status.HTTP_401_UNAUTHORIZED,
             "detail": {
@@ -110,6 +137,7 @@ async def google_auth(auth_request: GoogleAuthRequest, db: Session = Depends(get
             }
         }
     except Exception as e:
+        logger.error(f"Unexpected error during Google authentication: {str(e)}")
         return {
             "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
             "detail": {
