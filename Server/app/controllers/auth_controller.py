@@ -1,5 +1,3 @@
-# app/controllers/auth_controller.py
-
 from fastapi import Depends, status
 from sqlalchemy.orm import Session
 from app.db.models import User
@@ -9,13 +7,14 @@ from app.db.database import get_db
 from datetime import timedelta
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.error_handler import error_handler
+from app.services.email_service import email_service
 import logging
 from starlette.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
-def signup(user: UserCreate, db: Session):
+async def signup(user: UserCreate, db: Session):
     try:
         # Basic validation before database operations
         if not isinstance(user.email, str) or '@' not in user.email:
@@ -44,50 +43,6 @@ def signup(user: UserCreate, db: Session):
                 }
             )
 
-        # Validate password
-        try:
-            UserCreate.validate_password(user.password)
-        except ValueError as e:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={
-                    "detail": {
-                        "message": "Validation error",
-                        "code": "VALIDATION_ERROR",
-                        "error": f"400: {{'message': '{str(e)}', 'code': 'INVALID_PASSWORD', 'field': 'password'}}"
-                    }
-                }
-            )
-
-        # Validate names
-        try:
-            UserCreate.validate_name(user.nom, 'nom')
-        except ValueError as e:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={
-                    "detail": {
-                        "message": "Validation error",
-                        "code": "VALIDATION_ERROR",
-                        "error": f"400: {{'message': '{str(e)}', 'code': 'INVALID_NAME', 'field': 'nom'}}"
-                    }
-                }
-            )
-
-        try:
-            UserCreate.validate_name(user.prenom, 'prenom')
-        except ValueError as e:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={
-                    "detail": {
-                        "message": "Validation error",
-                        "code": "VALIDATION_ERROR",
-                        "error": f"400: {{'message': '{str(e)}', 'code': 'INVALID_NAME', 'field': 'prenom'}}"
-                    }
-                }
-            )
-
         # Hash password
         hashed_password = hash_password(user.password)
 
@@ -103,7 +58,20 @@ def signup(user: UserCreate, db: Session):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
+
+            # Send welcome email
+            try:
+                await email_service.send_welcome_email(
+                    email=new_user.email,
+                    name=f"{new_user.prenom} {new_user.nom}"
+                )
+                logger.info(f"Welcome email sent to {new_user.email}")
+            except Exception as email_error:
+                logger.error(f"Failed to send welcome email: {str(email_error)}")
+                # Continue with registration even if email fails
+
             return {"message": "User created successfully"}
+
         except Exception as db_error:
             db.rollback()
             logger.error(f"Database error in signup: {str(db_error)}")
@@ -119,7 +87,6 @@ def signup(user: UserCreate, db: Session):
             )
 
     except Exception as e:
-        db.rollback()
         logger.error(f"Error in signup: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -10,8 +10,9 @@ from app.schemas.user import PasswordUpdate
 
 
 # Business logic for user signup
-def create_user_service(user: UserCreate, db: Session):
-    return signup(user, db)
+# Business logic for user signup
+async def create_user_service(user: UserCreate, db: Session):
+    return await signup(user, db)
 
 # Business logic for user signin
 def authenticate_user_service(user: UserCreate, db: Session):

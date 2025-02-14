@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/signup")
-def signup_user(user: UserCreate, db: Session = Depends(get_db)):
+async def signup_user(user: UserCreate, db: Session = Depends(get_db)):
     try:
-        return create_user_service(user, db)
+        result = await create_user_service(user, db)
+        return result
     except HTTPException as he:
         raise he
     except Exception as e:
