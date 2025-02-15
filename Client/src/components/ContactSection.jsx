@@ -124,7 +124,7 @@ const ContactSection = () => {
                     </div>
                     <div className="flex items-center text-gray-700">
                       <FaEnvelope className="text-[#8DD3BB] text-xl mr-4" />
-                      <span>ouaailelaouad@gmail.com</span>
+                      <span>contact@touristai.online</span>
                     </div>
                     <div className="flex items-center text-gray-700">
                       <FaMapMarkerAlt className="text-[#8DD3BB] text-xl mr-4" />
