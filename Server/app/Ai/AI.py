@@ -124,51 +124,53 @@ def adjust_activities_to_budget(activities: List[dict], remaining_budget: float)
 
 
 def adjust_hotel_to_budget(city: str, budget: float, budget_tier: str) -> dict:
-    """Select an appropriate hotel based on the budget tier."""
-    hotel_df = tourism_df[(tourism_df['Ville'] == city) & (tourism_df['Type de donnée'] == 'Hôtel')]
+    """Sélectionne un hôtel existant selon la gamme de prix"""
+    hotel_df = tourism_df[(tourism_df['Ville'] == city) & 
+                        (tourism_df['Type de donnée'] == 'Hôtel')].copy()
     
     if hotel_df.empty:
-        # Fallback price ranges based on budget tier
-        if budget_tier == "Economy":
-            price_range = (100, 200)
-        elif budget_tier == "Standard":
-            price_range = (200, 1000)
-        else:  # Premium
-            price_range = (1000, 5000)
-        
-        return {
-            "Nom de l'élément": f"{budget_tier} Hotel",
-            "Coût (MAD)": random.uniform(*price_range)
-        }
+        raise ValueError(f"Aucun hôtel trouvé pour {city}")
+
+    # Trier par prix
+    hotel_df.sort_values('Coût (MAD)', inplace=True)
     
-    sorted_hotels = hotel_df.sort_values(by='Coût (MAD)')
-    total_hotels = len(sorted_hotels)
+    # Définir les plages de prix
+    price_ranges = {
+        "Economy": (0, 200),
+        "Standard": (200, 1000),
+        "Premium": (1000, 10000)
+    }
     
-    # Select percentile range based on budget tier
+    min_price, max_price = price_ranges[budget_tier]
+    
+    # Filtrer les hôtels dans la plage
     if budget_tier == "Economy":
-        # Bottom 30% of hotels
-        max_index = int(total_hotels * 0.3)
-        hotel_range = (0, max(0, max_index - 1))
+        filtered = hotel_df[hotel_df['Coût (MAD)'] < max_price]
     elif budget_tier == "Standard":
-        # Middle 40% of hotels
-        min_index = int(total_hotels * 0.3)
-        max_index = int(total_hotels * 0.7)
-        hotel_range = (min_index, max(min_index, max_index - 1))
+        filtered = hotel_df[(hotel_df['Coût (MAD)'] >= min_price) & 
+                          (hotel_df['Coût (MAD)'] < max_price)]
     else:  # Premium
-        # Top 30% of hotels
-        min_index = int(total_hotels * 0.7)
-        hotel_range = (min_index, total_hotels - 1)
-    
-    # Ensure we have a valid range
-    if hotel_range[0] >= total_hotels:
-        hotel_range = (0, total_hotels - 1)
-    if hotel_range[0] == hotel_range[1]:
-        selected_index = hotel_range[0]
+        filtered = hotel_df[hotel_df['Coût (MAD)'] >= min_price]
+
+    # Si aucun hôtel dans la plage, adapter la sélection
+    if filtered.empty:
+        if budget_tier == "Economy":
+            selected = hotel_df.iloc[0]  # Hôtel le moins cher
+        elif budget_tier == "Premium":
+            selected = hotel_df.iloc[-1]  # Hôtel le plus cher
+        else:  # Standard
+            mid_index = len(hotel_df) // 2
+            selected = hotel_df.iloc[mid_index]
     else:
-        selected_index = random.randint(hotel_range[0], hotel_range[1])
-    
-    selected_hotel = sorted_hotels.iloc[selected_index].to_dict()
-    return selected_hotel
+        selected = filtered.sample(1).iloc[0]
+
+    return {
+        "Nom de l'élément": selected['Nom de l\'élément'],
+        "Coût (MAD)": float(selected['Coût (MAD)']),
+        "Type de donnée": "Hôtel",
+        "Ville": city,
+        "Note": float(selected.get('Note', 3.0))
+    }
 
 def adjust_transport_to_budget(departure_city: str, arrival_city: str, budget: float) -> float:
     """Adjust transport cost based on the budget."""

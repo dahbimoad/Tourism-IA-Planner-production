@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Wallet, Calendar } from "lucide-react";
+import { MapPin, Wallet, Calendar, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "../contexts/PreferencesContext";
 import { TOURISM_IMAGES } from "../assets/tourismImages";
@@ -32,6 +32,19 @@ const Plans = () => {
       currency: "MAD",
       minimumFractionDigits: 0,
     }).format(Math.round(amount));
+  };
+
+  const getBudgetTierColor = (tier) => {
+    switch (tier) {
+      case "Economy":
+        return "text-emerald-600 bg-emerald-100";
+      case "Standard":
+        return "text-blue-600 bg-blue-100";
+      case "Premium":
+        return "text-purple-600 bg-purple-100";
+      default:
+        return "text-gray-600 bg-gray-100";
+    }
   };
 
   const renderCityDays = (plan) => {
@@ -98,6 +111,14 @@ const Plans = () => {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Budget Tier Badge */}
+                  <div className="absolute top-3 right-3">
+                    <div className={`flex items-center px-3 py-1 rounded-full ${getBudgetTierColor(plan.budget_tier)}`}>
+                      <Award className="w-4 h-4 mr-1" />
+                      <span className="text-sm font-medium">{plan.budget_tier}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="p-6 space-y-4">

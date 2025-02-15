@@ -126,7 +126,7 @@ const Footer = () => {
             <div className="space-y-2">
               <p className="flex items-center space-x-2">
                 <FaEnvelope className="text-gray-800" />
-                <span>contact@moroccotravel.com</span>
+                <span>contact@touristai.online</span>
               </p>
               <p className="flex items-center space-x-2">
                 <FaPhone className="text-gray-800" />
