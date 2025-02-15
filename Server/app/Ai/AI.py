@@ -123,24 +123,52 @@ def adjust_activities_to_budget(activities: List[dict], remaining_budget: float)
     return selected_activities
 
 
-def adjust_hotel_to_budget(city: str, budget: float) -> dict:
-    """Select a random low-budget hotel from the top 5 cheapest options."""
+def adjust_hotel_to_budget(city: str, budget: float, budget_tier: str) -> dict:
+    """Select an appropriate hotel based on the budget tier."""
     hotel_df = tourism_df[(tourism_df['Ville'] == city) & (tourism_df['Type de donnée'] == 'Hôtel')]
-
-    if not hotel_df.empty:
-        sorted_hotels = hotel_df.sort_values(by='Coût (MAD)')
-
-        # Always select from the top 5 cheapest hotels (or as many as available)
-        num_hotels = min(5, len(sorted_hotels))
-        if num_hotels > 0:
-            selected_index = random.randint(0, num_hotels - 1)
-            return sorted_hotels.iloc[selected_index].to_dict()
-
-    # Fallback if no hotels found
-    return {
-        "Nom de l'élément": 'Standard Hotel',
-        "Coût (MAD)": random.uniform(80, 120)
-    }
+    
+    if hotel_df.empty:
+        # Fallback price ranges based on budget tier
+        if budget_tier == "Economy":
+            price_range = (100, 200)
+        elif budget_tier == "Standard":
+            price_range = (200, 1000)
+        else:  # Premium
+            price_range = (1000, 5000)
+        
+        return {
+            "Nom de l'élément": f"{budget_tier} Hotel",
+            "Coût (MAD)": random.uniform(*price_range)
+        }
+    
+    sorted_hotels = hotel_df.sort_values(by='Coût (MAD)')
+    total_hotels = len(sorted_hotels)
+    
+    # Select percentile range based on budget tier
+    if budget_tier == "Economy":
+        # Bottom 30% of hotels
+        max_index = int(total_hotels * 0.3)
+        hotel_range = (0, max(0, max_index - 1))
+    elif budget_tier == "Standard":
+        # Middle 40% of hotels
+        min_index = int(total_hotels * 0.3)
+        max_index = int(total_hotels * 0.7)
+        hotel_range = (min_index, max(min_index, max_index - 1))
+    else:  # Premium
+        # Top 30% of hotels
+        min_index = int(total_hotels * 0.7)
+        hotel_range = (min_index, total_hotels - 1)
+    
+    # Ensure we have a valid range
+    if hotel_range[0] >= total_hotels:
+        hotel_range = (0, total_hotels - 1)
+    if hotel_range[0] == hotel_range[1]:
+        selected_index = hotel_range[0]
+    else:
+        selected_index = random.randint(hotel_range[0], hotel_range[1])
+    
+    selected_hotel = sorted_hotels.iloc[selected_index].to_dict()
+    return selected_hotel
 
 def adjust_transport_to_budget(departure_city: str, arrival_city: str, budget: float) -> float:
     """Adjust transport cost based on the budget."""
@@ -226,7 +254,8 @@ def optimize_city_order(departure_city: str, cities: List[str], transport_df: pd
 
     return optimized_route
 
-def calculate_plan(plan_request: PlanRequest, total_days: int, used_activities: set):
+def calculate_plan(plan_request: PlanRequest, total_days: int, used_activities: set, budget_tier: str = "Premium"):
+    # ... existing code ...
     departure_city = plan_request.lieuDepart
     cities = optimize_city_order(departure_city, plan_request.cities, transport_df)
 
@@ -279,7 +308,7 @@ def calculate_plan(plan_request: PlanRequest, total_days: int, used_activities: 
         transport_total += transport_cost
         total_cost += transport_cost
 
-        hotel = adjust_hotel_to_budget(city, budget)
+        hotel = adjust_hotel_to_budget(city, budget, budget_tier)
         hotel_cost = float(hotel['Coût (MAD)'])
         hotel_name = hotel['Nom de l\'élément']
         total_hotel_cost = hotel_cost * days_spent
@@ -351,31 +380,121 @@ def generate_plans(plan_request: PlanRequest):
             "Not enough days to visit all cities. Please reduce the number of cities or extend your trip."
         )
 
-    all_plans = []
+    # Calculate minimum required budget for Economy tier (30% of original budget)
+    economy_budget = plan_request.budget * 0.3
     used_activities = set()
 
-    for _ in range(3):
-        itinerary, total_cost, transport_total = calculate_plan(plan_request, total_days, used_activities)
+    # Test Economy tier feasibility
+    try:
+        test_request_economy = PlanRequest(
+            lieuDepart=plan_request.lieuDepart,
+            cities=plan_request.cities,
+            dateDepart=plan_request.dateDepart,
+            dateRetour=plan_request.dateRetour,
+            budget=economy_budget,
+            userId=plan_request.userId
+        )
+        _, test_total_cost_economy, _ = calculate_plan(test_request_economy, total_days, used_activities.copy(), budget_tier="Economy")
+        if test_total_cost_economy > plan_request.budget:
+            raise ValueError(
+                f"Not enough budget. Your budget of {plan_request.budget} MAD is insufficient. Please increase your budget or reduce the number of cities."
+            )
+    except Exception as e:
+        if "Not enough budget" in str(e):
+            raise
 
-        # Calculate breakdown of costs
+    # Check Premium tier feasibility (80% of budget)
+    premium_budget = plan_request.budget * 0.8
+    can_accommodate_premium = False
+    try:
+        test_request_premium = PlanRequest(
+            lieuDepart=plan_request.lieuDepart,
+            cities=plan_request.cities,
+            dateDepart=plan_request.dateDepart,
+            dateRetour=plan_request.dateRetour,
+            budget=premium_budget,
+            userId=plan_request.userId
+        )
+        _, test_total_cost_premium, _ = calculate_plan(test_request_premium, total_days, used_activities.copy(), budget_tier="Premium")
+        if test_total_cost_premium <= plan_request.budget:
+            can_accommodate_premium = True
+    except:
+        pass  # If calculation fails, assume Premium not feasible
+
+    # Check Standard tier feasibility (50% of budget)
+    standard_budget = plan_request.budget * 0.5
+    can_accommodate_standard = False
+    try:
+        test_request_standard = PlanRequest(
+            lieuDepart=plan_request.lieuDepart,
+            cities=plan_request.cities,
+            dateDepart=plan_request.dateDepart,
+            dateRetour=plan_request.dateRetour,
+            budget=standard_budget,
+            userId=plan_request.userId
+        )
+        _, test_total_cost_standard, _ = calculate_plan(test_request_standard, total_days, used_activities.copy(), budget_tier="Standard")
+        if test_total_cost_standard <= plan_request.budget:
+            can_accommodate_standard = True
+    except:
+        pass  # If calculation fails, assume Standard not feasible
+
+    # Determine which tiers to generate
+    if can_accommodate_premium:
+        # Generate all three tiers
+        budget_tiers = [
+            {"name": "Premium", "percentage": random.uniform(0.8, 1)},
+            {"name": "Standard", "percentage": random.uniform(0.5, 0.8)},
+            {"name": "Economy", "percentage": random.uniform(0.3, 0.5)}
+        ]
+    elif can_accommodate_standard:
+        # Generate one Standard and two Economy
+        budget_tiers = [
+            {"name": "Standard", "percentage": random.uniform(0.5, 0.8)},
+            {"name": "Economy", "percentage": random.uniform(0.35, 0.5)},
+            {"name": "Economy", "percentage": random.uniform(0.3, 0.35)}
+        ]
+    else:
+        # Generate three Economy
+        budget_tiers = [
+            {"name": "Economy", "percentage": random.uniform(0.4, 0.5)},
+            {"name": "Economy", "percentage": random.uniform(0.35, 0.4)},
+            {"name": "Economy", "percentage": random.uniform(0.3, 0.35)}
+        ]
+
+    all_plans = []
+    original_budget = plan_request.budget
+
+    for tier in budget_tiers:
+        used_activities = set()  # Reset activities for each tier
+        tier_budget = original_budget * tier["percentage"]
+        
+        modified_request = PlanRequest(
+            lieuDepart=plan_request.lieuDepart,
+            cities=plan_request.cities,
+            dateDepart=plan_request.dateDepart,
+            dateRetour=plan_request.dateRetour,
+            budget=tier_budget,
+            userId=plan_request.userId
+        )
+        
+        itinerary, total_cost, transport_total = calculate_plan(
+            modified_request, 
+            total_days, 
+            used_activities,
+            budget_tier=tier["name"]
+        )
+
         hotels_total = sum(city['hotel']['totalPrice'] for city in itinerary)
         activities_total = sum(city['total_activities_cost'] for city in itinerary)
-
-        # Recalculate total cost to ensure accuracy
         total_cost = hotels_total + activities_total + int(transport_total)
-
-        # Add budget validation
-        if total_cost > plan_request.budget:
-            raise ValueError(
-                f"Not enough budget.  "
-                f"exceeds your budget of {plan_request.budget} MAD. "
-                "Please increase your budget or reduce the number of cities."
-            )
-
+        
         all_plans.append({
             "plan": itinerary,
             "total_cost": total_cost,
             "total_days_spent": total_days,
+            "budget_tier": tier["name"],
+            "budget_percentage": int(tier["percentage"] * 100),
             "breakdown": {
                 "hotels_total": hotels_total,
                 "activities_total": activities_total,
