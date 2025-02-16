@@ -69,3 +69,39 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
                 "error": str(e)
             }
         )
+
+
+@router.post("/test-email")
+async def test_email():
+    """Test endpoint for email service"""
+    try:
+        # First test SMTP connection
+        connection_test = await email_service.test_connection()
+        if not connection_test:
+            return {
+                "status": "error",
+                "message": "Failed to connect to SMTP server"
+            }
+
+        # Try sending a test email
+        success = await email_service.send_welcome_email(
+            email=settings.MAIL_USERNAME,  # Send to yourself
+            name="Test User"
+        )
+
+        if success:
+            return {
+                "status": "success",
+                "message": "Test email sent successfully"
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "Failed to send test email"
+            }
+    except Exception as e:
+        logger.error(f"Test email error: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error: {str(e)}"
+        }
