@@ -33,10 +33,13 @@ class EmailService:
         )
         self.fast_mail = FastMail(self.conf)
 
-
-    async def send_welcome_email(self, email: str, name: str):
+    async def send_welcome_email(self, email: str, name: str) -> bool:
+        """
+        Send welcome email to newly registered users using a template
+        """
         try:
             logger.info(f"Attempting to send welcome email to {email}")
+            # Load and render the template
             template = self.env.get_template('welcome.html')
             html_content = template.render(
                 name=name,
@@ -48,18 +51,14 @@ class EmailService:
                 subject="Welcome to TouristAI - Let's Explore Morocco Together!",
                 recipients=[email],
                 body=html_content,
-                subtype="html",
-                headers={
-                    "Return-Path": settings.MAIL_FROM,
-                    "Reply-To": settings.MAIL_FROM,
-                    "X-Mailer": "TouristAI Email Service",
-                }
+                subtype="html"
             )
             await self.fast_mail.send_message(message)
             logger.info(f"Welcome email sent successfully to {email}")
             return True
         except Exception as e:
             logger.error(f"Failed to send welcome email to {email}: {str(e)}")
+            logger.error(f"SMTP Settings used: Server={settings.MAIL_SERVER}, Port={settings.MAIL_PORT}")
             return False
 
     async def send_google_welcome_email(self, email: str, name: str) -> bool:
