@@ -57,53 +57,7 @@ An AI-powered web application for generating personalized tourist itineraries in
 - GitHub Actions (CI/CD)
 - PostgreSQL (Production database)
 
-## 🚀 Getting Started
 
-### Prerequisites
-- Python 3.8+
-- Node.js 16+
-- PostgreSQL
-- OpenAI API key
-
-### Local Development Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/Tourism-IA-Planner.git
-   cd Tourism-IA-Planner
-   ```
-
-2. **Backend Setup**
-   ```bash
-   # Create and activate virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   
-   # Set up environment variables
-   cp .env.example .env
-   # Edit .env with your configurations
-   
-   # Run database migrations
-   alembic upgrade head
-   
-   # Start the backend server
-   uvicorn main:app --reload
-   ```
-
-3. **Frontend Setup**
-   ```bash
-   cd client
-   npm install
-   npm run dev
-   ```
-
-4. The application will be available at:
-   - Frontend: `http://localhost:5173`
-   - Backend: `http://localhost:8000`
-   - API Documentation: `http://localhost:8000/docs`
 
 ## 💡 Usage
 
