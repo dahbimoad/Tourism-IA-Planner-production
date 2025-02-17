@@ -101,5 +101,4 @@ For any queries or support, please reach out to:
 ## 🙏 Acknowledgments
 
 - OpenAI for AI capabilities
-- Moroccan Tourism Office for destination data
 - All the members of our development team for their dedication and hard work
